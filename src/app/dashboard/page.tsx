@@ -1,6 +1,5 @@
 import DashboardNavbar from "@/components/dashboard-navbar";
 import { InfoIcon, UserCircle } from "lucide-react";
-import { redirect } from "next/navigation";
 import { createClient } from "../../../supabase/server";
 
 export default async function Dashboard() {
@@ -11,9 +10,26 @@ export default async function Dashboard() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return redirect("/sign-in");
-  }
+  return (
+    <>
+      <DashboardNavbar />
+      <main className="w-full">
+        <div className="container mx-auto px-4 py-16 flex flex-col items-center gap-6 text-center">
+          <h1 className="text-3xl font-bold">Welcome to Unvaultd</h1>
+          <p className="text-muted-foreground max-w-md">
+            Sign in to access your dashboard and manage your account.
+          </p>
 
+          <a href="/sign-in">
+            <button className="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium">
+              Sign in
+            </button>
+          </a>
+        </div>
+      </main>
+    </>
+  );
+}
 
 
   return (

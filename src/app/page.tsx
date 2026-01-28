@@ -1,4 +1,11 @@
 import { redirect } from "next/navigation";
+
+export default function Home() {
+  redirect("/dashboard");
+}
+
+
+/*import { redirect } from "next/navigation";
 import { createClient } from "../../supabase/server";
 import { FeedGrid } from "@/components/feed/feed-grid";
 import { FeedHeader } from "@/components/feed/feed-header";
@@ -19,3 +26,4 @@ export default async function Home() {
     </div>
   );
 }
+*/
