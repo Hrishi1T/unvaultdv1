@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "../../../supabase/server";
+import Link from "next/link";
+
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -17,6 +19,17 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-white">
+<header>
+  <div className="mx-auto max-w-6xl px-6 py-6 flex items-center justify-between">
+    <a
+      href="/"
+      className="font-display text-xl tracking-tight text-zinc-900"
+    >
+      UNVAULTD
+    </a>
+  </div>
+</header>
+
       <div className="mx-auto max-w-6xl px-6 py-10">
         <div className="flex items-start justify-between gap-4">
           <div>

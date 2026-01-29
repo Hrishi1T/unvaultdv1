@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FeedHeader } from "@/components/feed/feed-header";
 import { FeedGrid } from "@/components/feed/feed-grid";
 import { SignInModal } from "@/app/sign_in_auth/sign-in-modal";
+import UserProfile from "@/components/user-profile";
 
 
 export default async function Home() {
@@ -29,16 +30,10 @@ export default async function Home() {
 
           <div className="flex items-center gap-2">
             {user ? (
-              <Link
-                href="/dashboard"
-                className="px-3 py-2 rounded-full border border-zinc-300 bg-white text-sm hover:bg-zinc-50"
-              >
-                Dashboard
-              </Link>
-            ) : (
-             <SignInModal triggerClassName="px-3 py-2 rounded-full border border-zinc-300 bg-white text-sm hover:bg-zinc-50" />
-
-            )}
+  <UserProfile />
+) : (
+  <SignInModal triggerClassName="px-3 py-2 rounded-full border border-zinc-300 bg-white text-sm hover:bg-zinc-50" />
+)}
           </div>
         </div>
       </header>

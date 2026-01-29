@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { UserCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -49,32 +48,28 @@ export default function UserProfile() {
     );
   }, [user]);
 
-  const avatarUrl = useMemo(() => {
-    if (!user) return "";
-    const meta: any = user.user_metadata ?? {};
-    return meta.avatar_url || meta.picture || "";
-  }, [user]);
+  const initials = useMemo(() => {
+    const base = (name || "").trim();
+    if (!base) return "U";
+    const parts = base.split(/\s+/).filter(Boolean);
+    const first = parts[0]?.[0] ?? "";
+    const last = parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : "";
+    const out = (first + last).toUpperCase();
+    return out || "U";
+  }, [name]);
 
   if (!user) return null;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-10 px-2 rounded-full">
-          <span className="flex items-center gap-2">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={name}
-                className="h-7 w-7 rounded-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <UserCircle className="h-7 w-7" />
-            )}
-            <span className="text-sm font-medium text-zinc-900 max-w-[140px] truncate">
-              {name}
-            </span>
+        <Button
+          variant="ghost"
+          className="h-10 w-10 rounded-full p-0 border border-zinc-200 bg-white hover:bg-zinc-50"
+          aria-label="Open profile menu"
+        >
+          <span className="h-9 w-9 rounded-full bg-zinc-900 text-white flex items-center justify-center text-sm font-semibold">
+            {initials}
           </span>
         </Button>
       </DropdownMenuTrigger>
@@ -93,7 +88,7 @@ export default function UserProfile() {
           onClick={async () => {
             await supabase.auth.signOut();
             router.refresh();
-            router.push("/"); // ✅ always homepage after signout
+            router.push("/");
           }}
           className="cursor-pointer"
         >
