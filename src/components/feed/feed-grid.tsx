@@ -47,11 +47,13 @@ export function FeedGrid({ userId }: FeedGridProps) {
 
   useEffect(() => {
     loadPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ✅ DO NOT TOUCH SUPABASE QUERY LOGIC
   const loadPosts = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("posts")
       .select(`
         *,
@@ -76,6 +78,7 @@ export function FeedGrid({ userId }: FeedGridProps) {
     setLoading(false);
   };
 
+  // ✅ DO NOT TOUCH SUPABASE MUTATION LOGIC
   const handleLike = async (postId: string) => {
     const post = posts.find((p) => p.id === postId);
     const isLiked = post?.likes.some((like) => like.user_id === userId);
@@ -89,6 +92,7 @@ export function FeedGrid({ userId }: FeedGridProps) {
     loadPosts();
   };
 
+  // ✅ DO NOT TOUCH SUPABASE MUTATION LOGIC
   const handleSave = async (postId: string) => {
     const post = posts.find((p) => p.id === postId);
     const isSaved = post?.saves.some((save) => save.user_id === userId);
@@ -104,13 +108,16 @@ export function FeedGrid({ userId }: FeedGridProps) {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <div key={i} className="space-y-4 animate-pulse">
-              <Skeleton className="aspect-[3/4] w-full" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
+      <div className="mx-auto max-w-6xl px-4 py-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
+              <Skeleton className="aspect-square w-full rounded-none bg-zinc-200" />
+              <div className="p-3 space-y-2">
+                <Skeleton className="h-4 w-3/4 bg-zinc-200" />
+                <Skeleton className="h-3 w-1/2 bg-zinc-200" />
+                <Skeleton className="h-3 w-1/3 bg-zinc-200" />
+              </div>
             </div>
           ))}
         </div>
@@ -120,15 +127,9 @@ export function FeedGrid({ userId }: FeedGridProps) {
 
   return (
     <>
-      <div className="container mx-auto px-4 py-8">
-        <div
-          className="grid gap-6"
-          style={{
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gridAutoRows: "10px",
-          }}
-        >
-          {posts.map((post, index) => (
+      <div className="mx-auto max-w-6xl px-4 py-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          {posts.map((post) => (
             <PostCard
               key={post.id}
               post={post}
@@ -136,10 +137,6 @@ export function FeedGrid({ userId }: FeedGridProps) {
               onLike={handleLike}
               onSave={handleSave}
               onClick={() => setSelectedPost(post)}
-              style={{
-                gridRowEnd: `span ${Math.floor(Math.random() * 20) + 40}`,
-                animationDelay: `${index * 50}ms`,
-              }}
             />
           ))}
         </div>
