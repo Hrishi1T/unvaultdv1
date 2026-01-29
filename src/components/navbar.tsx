@@ -3,6 +3,7 @@ import { createClient } from '../../supabase/server'
 import { Button } from './ui/button'
 import { User, UserCircle } from 'lucide-react'
 import UserProfile from './user-profile'
+import { SignInModal } from "@/app/sign_in_auth/sign-in-modal";
 
 export default async function Navbar() {
   const supabase = createClient()
@@ -31,12 +32,7 @@ export default async function Navbar() {
             </>
           ) : (
             <>
-              <Link
-                href="/sign-in"
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                Sign In
-              </Link>
+              <SignInModal triggerClassName="text-sm font-medium" />
               <Link
                 href="/sign-up"
                 className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-gray-800"
