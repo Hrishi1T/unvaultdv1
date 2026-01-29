@@ -290,7 +290,7 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
         </div>
 
         {/* Tabs + Content constrained to match the post card column */}
-        <div className="mt-6 max-w-[320px]">
+        <div className="mt-6 w-full">
           {/* Tabs */}
           <div className="border-b border-zinc-200">
             <div className="flex gap-8">
@@ -335,7 +335,7 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
               </div>
             ) : (
               // Single-column stack that matches the constrained width
-              <div className="grid gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
                 {activeList.map((post, index) => (
                   <PostCard
                     key={post.id}

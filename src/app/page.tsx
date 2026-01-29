@@ -4,6 +4,7 @@ import { FeedHeader } from "@/components/feed/feed-header";
 import { FeedGrid } from "@/components/feed/feed-grid";
 import { SignInModal } from "@/app/sign_in_auth/sign-in-modal";
 import UserProfile from "@/components/user-profile";
+import { PublicFeedGrid } from "@/components/feed/public-feed-grid";
 
 
 export default async function Home() {
@@ -12,6 +13,27 @@ export default async function Home() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Fetch posts server-side with public access
+  const { data: postsData } = await supabase
+    .from("posts")
+    .select(`
+      *,
+      users!posts_user_id_fkey (id, email, name, avatar_url),
+      post_images (id, image_url, order_index),
+      likes (id, user_id),
+      saves (id, user_id)
+    `)
+    .order("created_at", { ascending: false });
+
+  const posts = (postsData || []).map((post: any) => ({
+    ...post,
+    post_images: post.post_images?.slice()?.sort((a: any, b: any) => a.order_index - b.order_index),
+    _count: {
+      likes: post.likes?.length || 0,
+      saves: post.saves?.length || 0,
+    },
+  }));
 
   return (
     <div className="min-h-screen bg-white text-zinc-900">
@@ -39,30 +61,7 @@ export default async function Home() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-4">
-        {/* IMPORTANT: your FeedGrid currently requires userId and does likes/saves.
-           For a public homepage, you have two safe options:
-
-           1) Show skeleton placeholders instead of live feed (zero Supabase changes)
-           2) Make FeedGrid support "read-only mode" when no user (requires editing FeedGrid)
-        */}
-
-        {/* Option 1: public homepage skeletons */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="rounded-lg border border-zinc-200 bg-white overflow-hidden animate-pulse">
-              <div className="aspect-square w-full bg-zinc-200" />
-              <div className="p-3 space-y-2">
-                <div className="h-4 w-3/4 bg-zinc-200 rounded" />
-                <div className="h-3 w-1/2 bg-zinc-200 rounded" />
-                <div className="h-3 w-1/3 bg-zinc-200 rounded" />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Option 2 (later): if user exists, render live feed
-        {user ? <FeedGrid userId={user.id} /> : <PublicSkeletonGrid />}
-        */}
+        <PublicFeedGrid posts={posts} userId={user?.id || null} />
       </main>
     </div>
   );

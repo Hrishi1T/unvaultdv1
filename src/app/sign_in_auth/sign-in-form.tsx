@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
 import { signInAction } from "@/app/actions";
+import GoogleAuth from "@/components/auth/GoogleAuth";
 
 type SignInFormProps = {
   variant?: "page" | "modal";
@@ -25,6 +26,8 @@ export default function SignInForm({ variant = "page" }: SignInFormProps) {
       <h1 className="text-lg font-semibold tracking-tight text-zinc-900 mb-4">
         Sign in
       </h1>
+
+      <GoogleAuth redirectTo="/" />
 
       {/* IMPORTANT: server action lives on the form */}
       <form action={signInAction} className="space-y-3">

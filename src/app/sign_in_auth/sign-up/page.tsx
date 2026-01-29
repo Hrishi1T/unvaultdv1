@@ -6,6 +6,7 @@ import Link from "next/link";
 import { SmtpMessage } from "../smtp-message";
 import { signUpAction } from "@/app/actions";
 import { UrlProvider } from "@/components/url-provider";
+import GoogleAuth from "@/components/auth/GoogleAuth";
 
 export default async function Signup(props: { searchParams: Promise<Message> }) {
   const searchParams = await props.searchParams;
@@ -52,6 +53,14 @@ export default async function Signup(props: { searchParams: Promise<Message> }) 
                       Sign in
                     </Link>
                   </p>
+                </div>
+
+                <GoogleAuth redirectTo="/" label="Sign up with Google" />
+
+                <div className="my-1 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-zinc-200" />
+                  <span className="text-xs text-zinc-500">or</span>
+                  <div className="h-px flex-1 bg-zinc-200" />
                 </div>
 
                 <div className="space-y-3 pt-2">
