@@ -1,68 +1,82 @@
-import DashboardNavbar from "@/components/dashboard-navbar";
-import { InfoIcon, UserCircle } from "lucide-react";
+import { redirect } from "next/navigation";
 import { createClient } from "../../../supabase/server";
 
-export default async function Dashboard() {
+export default async function DashboardPage() {
   const supabase = await createClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (!user) redirect("/sign_in_auth/sign-in");
+
+  const meta: any = user.user_metadata ?? {};
+  const name =
+    meta.full_name ||
+    meta.name ||
+    (typeof user.email === "string" ? user.email.split("@")[0] : "Account");
+
   return (
-    <>
-      <DashboardNavbar />
-      <main className="w-full">
-        <div className="container mx-auto px-4 py-16 flex flex-col items-center gap-6 text-center">
-          <h1 className="text-3xl font-bold">Welcome to Unvaultd</h1>
-          <p className="text-muted-foreground max-w-md">
-            Sign in to access your dashboard and manage your account.
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-6xl px-6 py-10">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">
+              Dashboard
+            </h1>
+            <p className="mt-1 text-sm text-zinc-600">
+              Welcome back, <span className="font-medium text-zinc-900">{name}</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <p className="text-sm text-zinc-500">Account</p>
+            <p className="mt-2 text-base font-medium text-zinc-900">
+              {user.email}
+            </p>
+            <p className="mt-1 text-xs text-zinc-500">
+              Signed in via {user.app_metadata?.provider ?? "auth"}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <p className="text-sm text-zinc-500">Quick actions</p>
+            <div className="mt-3 flex flex-col gap-2">
+              <a
+                href="/upload"
+                className="inline-flex items-center justify-center rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50"
+              >
+                Upload a post
+              </a>
+              <a
+                href="/profile"
+                className="inline-flex items-center justify-center rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50"
+              >
+                View profile
+              </a>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <p className="text-sm text-zinc-500">Status</p>
+            <p className="mt-2 text-base font-medium text-zinc-900">
+              Authenticated
+            </p>
+            <p className="mt-1 text-xs text-zinc-500">
+              This page is protected and only visible to signed-in users.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-10 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+          <h2 className="text-base font-semibold text-zinc-900">Coming next</h2>
+          <p className="mt-2 text-sm text-zinc-600">
+            This is where you’ll show saved posts, uploads, messages, and profile
+            stats — in the same minimal Unvaultd style as your homepage.
           </p>
-
-          <a href="/sign-in">
-            <button className="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium">
-              Sign in
-            </button>
-          </a>
         </div>
-      </main>
-    </>
-  );
-}
-
-
-  return (
-    <>
-      <DashboardNavbar />
-      <main className="w-full">
-        <div className="container mx-auto px-4 py-8 flex flex-col gap-8">
-          {/* Header Section */}
-          <header className="flex flex-col gap-4">
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <div className="bg-secondary/50 text-sm p-3 px-4 rounded-lg text-muted-foreground flex gap-2 items-center">
-              <InfoIcon size="14" />
-              <span>This is a protected page only visible to authenticated users</span>
-            </div>
-          </header>
-
-          {/* User Profile Section */}
-          <section className="bg-card rounded-xl p-6 border shadow-sm">
-            <div className="flex items-center gap-4 mb-6">
-              <UserCircle size={48} className="text-primary" />
-              <div>
-                <h2 className="font-semibold text-xl">User Profile</h2>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
-              </div>
-            </div>
-            <div className="bg-muted/50 rounded-lg p-4 overflow-hidden">
-              <pre className="text-xs font-mono max-h-48 overflow-auto">
-                {JSON.stringify(user, null, 2)}
-              </pre>
-            </div>
-          </section>
-        </div>
-      </main>
-    </>
+      </div>
+    </div>
   );
 }

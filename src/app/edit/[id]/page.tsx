@@ -12,7 +12,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/sign-in");
+    redirect("/sign_in_auth/sign-in");
   }
 
   // Fetch the post to verify ownership

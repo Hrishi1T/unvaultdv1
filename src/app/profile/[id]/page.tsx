@@ -12,7 +12,7 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/sign-in");
+    redirect("/sign_in_auth/sign-in");
   }
 
   return <ProfileView userId={id} isOwnProfile={user.id === id} />;

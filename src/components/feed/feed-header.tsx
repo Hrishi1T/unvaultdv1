@@ -25,7 +25,7 @@ export function FeedHeader({ user }: FeedHeaderProps) {
   // ✅ Supabase logic unchanged (just guarded)
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push("/sign-in");
+    router.push("/");
   };
 
   const avatarUrl =
@@ -110,7 +110,7 @@ export function FeedHeader({ user }: FeedHeaderProps) {
             </>
           ) : (
             <Link
-              href="/sign-in"
+              href="/sign_in_auth/sign-in"
               className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-zinc-300 bg-white text-sm text-zinc-900 hover:bg-zinc-50 transition-colors"
             >
               Sign in

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "../../../../supabase/server";
+import { createClient } from "../../../supabase/server";
 import { UploadForm } from "@/components/upload/upload-form";
 
 export default async function UploadPage() {
@@ -7,7 +7,7 @@ export default async function UploadPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/sign-in");
+    redirect("/sign_in_auth/sign-in");
   }
 
   return (

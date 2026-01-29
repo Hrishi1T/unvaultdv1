@@ -15,7 +15,7 @@ export const signUpAction = async (formData: FormData) => {
   if (!email || !password) {
     return encodedRedirect(
       "error",
-      "/sign-up",
+      "/sign_in_auth/sign-up",
       "Email and password are required",
     );
   }
@@ -37,7 +37,7 @@ export const signUpAction = async (formData: FormData) => {
 
   if (error) {
     console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
+    return encodedRedirect("error", "/sign_in_auth/sign-up", error.message);
   }
 
   if (user) {
@@ -64,26 +64,35 @@ export const signUpAction = async (formData: FormData) => {
 
   return encodedRedirect(
     "success",
-    "/sign-up",
+      "/",
     "Thanks for signing up! Please check your email for a verification link.",
   );
 };
 
 export const signInAction = async (formData: FormData) => {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const email = formData.get("email")?.toString();
+  const password = formData.get("password")?.toString();
   const supabase = await createClient();
+
+  // ✅ This is what fixes the TS error AND the runtime issue
+  if (!email || !password) {
+    return encodedRedirect(
+      "error",
+      "/sign_in_auth/sign-in",
+      "Email and password are required"
+    );
+  }
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
-    password,
+    password, // ✅ now password is guaranteed string
   });
 
   if (error) {
-    return encodedRedirect("error", "/sign-in", error.message);
+    return encodedRedirect("error", "/sign_in_auth/sign-in", error.message);
   }
 
-  return redirect("/dashboard");
+  return redirect("/");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
@@ -160,5 +169,5 @@ export const resetPasswordAction = async (formData: FormData) => {
 export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  return redirect("/sign-in");
+  return redirect("/");
 };
