@@ -76,10 +76,10 @@ export default function UserProfile() {
 
       <DropdownMenuContent align="end" className="min-w-[180px]">
         <DropdownMenuItem
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push("/profile")}
           className="cursor-pointer"
         >
-          Dashboard
+          Your Profile
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
