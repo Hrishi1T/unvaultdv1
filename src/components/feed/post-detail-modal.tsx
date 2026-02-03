@@ -12,6 +12,7 @@ import {
   MessageCircle,
   Edit,
   Trash2,
+  Instagram,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -39,6 +40,13 @@ interface PostDetailModalProps {
   onUpdate: () => void;
 }
 
+function safeUrl(url?: string | null) {
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
 export function PostDetailModal({
   post,
   userId,
@@ -55,15 +63,18 @@ export function PostDetailModal({
   const isLiked = post.likes?.some((like: any) => like.user_id === userId);
   const isSaved = post.saves?.some((save: any) => save.user_id === userId);
   const isOwner = post.user_id === userId;
+
   const images =
     post.post_images?.sort((a: any, b: any) => a.order_index - b.order_index) ||
     [];
 
   const nextImage = () => {
+    if (!images.length) return;
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
 
   const prevImage = () => {
+    if (!images.length) return;
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
@@ -74,10 +85,20 @@ export function PostDetailModal({
     onUpdate();
   };
 
+  // ✅ New: separate links
+  const brandWebsite = safeUrl(post.brand_website);
+  const instagramUrl = safeUrl(post.brand_social_link); // treating this as Instagram
+
   return (
     <>
       <Dialog open={true} onOpenChange={onClose}>
         <DialogContent className="max-w-6xl h-[85vh] p-0 overflow-hidden bg-white border border-zinc-200 rounded-2xl shadow-xl">
+          <VisuallyHidden>
+            <DialogTitle>
+              {post.brand ? `${post.brand} post details` : "Post details"}
+            </DialogTitle>
+          </VisuallyHidden>
+
           <div className="flex h-full bg-white">
             {/* Image Section */}
             <div className="flex-1 relative overflow-hidden bg-black">
@@ -99,12 +120,14 @@ export function PostDetailModal({
                   <button
                     onClick={prevImage}
                     className="absolute left-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/90 backdrop-blur border border-zinc-200 text-zinc-700 hover:bg-white transition flex items-center justify-center"
+                    aria-label="Previous image"
                   >
                     <ChevronLeft className="w-6 h-6" />
                   </button>
                   <button
                     onClick={nextImage}
                     className="absolute right-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/90 backdrop-blur border border-zinc-200 text-zinc-700 hover:bg-white transition flex items-center justify-center"
+                    aria-label="Next image"
                   >
                     <ChevronRight className="w-6 h-6" />
                   </button>
@@ -123,6 +146,7 @@ export function PostDetailModal({
                           ? "bg-zinc-900 w-8"
                           : "bg-zinc-300 w-2"
                       }`}
+                      aria-label={`Go to image ${index + 1}`}
                     />
                   ))}
                 </div>
@@ -132,6 +156,7 @@ export function PostDetailModal({
               <button
                 onClick={onClose}
                 className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/90 backdrop-blur border border-zinc-200 text-zinc-700 hover:bg-white transition flex items-center justify-center"
+                aria-label="Close"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -157,7 +182,9 @@ export function PostDetailModal({
                     <p className="text-sm font-medium text-zinc-900">
                       {post.users?.name || "Anonymous"}
                     </p>
-                    <p className="text-xs text-zinc-500">@{post.users?.username || `user_${post.user_id?.slice(0, 8)}`}</p>
+                    <p className="text-xs text-zinc-500">
+                      @{post.users?.username || `user_${post.user_id?.slice(0, 8)}`}
+                    </p>
                   </div>
                 </Link>
 
@@ -165,6 +192,7 @@ export function PostDetailModal({
                   <Link
                     href={`/messages?user=${post.users?.id}`}
                     className="h-9 w-9 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-700 hover:bg-zinc-50 transition"
+                    aria-label="Message user"
                   >
                     <MessageCircle className="w-4 h-4" />
                   </Link>
@@ -197,18 +225,38 @@ export function PostDetailModal({
                     </div>
                   )}
 
-                  {post.brand_social_link && (
+                  {/* ✅ New: Brand website */}
+                  {brandWebsite && (
                     <div>
                       <span className="text-[11px] uppercase tracking-wide text-zinc-500">
-                        Brand Link
+                        Brand Website
                       </span>
                       <a
-                        href={post.brand_social_link}
+                        href={brandWebsite}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-blue-600 hover:underline block truncate"
                       >
-                        {post.brand_social_link}
+                        {brandWebsite}
+                      </a>
+                    </div>
+                  )}
+
+                  {/* ✅ New: Instagram link */}
+                  {instagramUrl && (
+                    <div>
+                      <a
+                        href={instagramUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 inline-flex items-center gap-2 text-sm text-zinc-800 hover:underline"
+                        aria-label="Open Instagram"
+                      >
+                        <Instagram className="w-4 h-4 text-zinc-700" />
+                        Instagram
+                      </a>
+                      <a className="text-xs text-zinc-500 truncate mt-1">
+                        {instagramUrl}
                       </a>
                     </div>
                   )}
@@ -245,9 +293,12 @@ export function PostDetailModal({
                         ? "bg-zinc-900 border-zinc-900 text-white"
                         : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50"
                     }`}
+                    aria-label="Like"
                   >
                     <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
-                    <span className="font-ui font-semibold">{post._count?.likes || 0}</span>
+                    <span className="font-ui font-semibold">
+                      {post._count?.likes || 0}
+                    </span>
                   </button>
 
                   <button
@@ -257,9 +308,14 @@ export function PostDetailModal({
                         ? "bg-zinc-900 border-zinc-900 text-white"
                         : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50"
                     }`}
+                    aria-label="Save"
                   >
-                    <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
-                    <span className="font-ui font-semibold">{post._count?.saves || 0}</span>
+                    <Bookmark
+                      className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`}
+                    />
+                    <span className="font-ui font-semibold">
+                      {post._count?.saves || 0}
+                    </span>
                   </button>
                 </div>
 

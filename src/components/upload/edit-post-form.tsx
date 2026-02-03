@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "../../../supabase/client";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
+// ✅ Shared fields (same UI as upload)
+import { ListingFormFields, type ListingFormData } from "../upload/listing";
 
 interface EditPostFormProps {
   post: any;
@@ -17,21 +16,36 @@ interface EditPostFormProps {
 export function EditPostForm({ post, userId }: EditPostFormProps) {
   const router = useRouter();
   const supabase = createClient();
+
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({
+
+  const [formData, setFormData] = useState<ListingFormData>({
     brand: post.brand || "",
     garment_type: post.garment_type || "",
     color: post.color || "",
     size_fit: post.size_fit || "",
     brand_social_link: post.brand_social_link || "",
+    brand_website: post.brand_website || "",
     description: post.description || "",
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const normalizeUrl = (url: string) => {
+    const trimmed = url.trim();
+    if (!trimmed) return null;
+    return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  };
 
-    if (!formData.brand || !formData.garment_type || !formData.color) {
-      alert("Please fill in all required fields");
+  const handleSubmit = async () => {
+    if (
+      !formData.brand ||
+      !formData.garment_type ||
+      !formData.color ||
+      !formData.brand_social_link ||
+      !formData.brand_website
+    ) {
+      alert(
+        "Please fill in all required fields (Brand, Garment Type, Color, Brand Social Link, Brand Website).",
+      );
       return;
     }
 
@@ -45,7 +59,15 @@ export function EditPostForm({ post, userId }: EditPostFormProps) {
           garment_type: formData.garment_type,
           color: formData.color,
           size_fit: formData.size_fit || null,
-          brand_social_link: formData.brand_social_link || null,
+
+          brand_social_link: formData.brand_social_link
+            ? normalizeUrl(formData.brand_social_link)
+            : null,
+
+          brand_website: formData.brand_website
+            ? normalizeUrl(formData.brand_website)
+            : null,
+
           description: formData.description || null,
           updated_at: new Date().toISOString(),
         })
@@ -62,122 +84,85 @@ export function EditPostForm({ post, userId }: EditPostFormProps) {
     }
   };
 
-  return (
-    <div className="min-h-screen noise-texture">
-      <header className="border-b-[3px] border-foreground bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/profile" className="flex items-center gap-2">
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-ui font-semibold">Cancel</span>
-          </Link>
-          <h1 className="font-display text-2xl uppercase">Edit Post</h1>
-          <div className="w-24" />
+  const canSave =
+    !!formData.brand &&
+    !!formData.garment_type &&
+    !!formData.color &&
+    !!formData.brand_social_link &&
+    !!formData.brand_website;
+
+ return (
+  <div className="min-h-screen bg-white">
+    <div className="mx-auto max-w-5xl px-4 py-10">
+      {/* Page title (match upload) */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold text-zinc-900">
+            Edit listing
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Update details.
+          </p>
         </div>
-      </header>
+      </div>
 
-      <div className="container mx-auto px-4 py-12 max-w-2xl">
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="space-y-6">
-            <div>
-              <Label htmlFor="brand" className="font-ui uppercase tracking-wide">
-                Brand *
-              </Label>
-              <Input
-                id="brand"
-                value={formData.brand}
-                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                placeholder="e.g., Nike, Vintage, Custom"
-                className="border-[3px] border-foreground font-editorial text-lg"
-                required
-              />
-            </div>
+      {/* Two-column layout: form + sidebar */}
+      <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_320px]">
+        {/* LEFT */}
+        <div className="space-y-10">
+          {/* Details (shared component - EXACT same as upload) */}
+          <ListingFormFields
+            formData={formData}
+            setFormData={setFormData}
+          />
 
-            <div>
-              <Label htmlFor="garment_type" className="font-ui uppercase tracking-wide">
-                Garment Type *
-              </Label>
-              <Input
-                id="garment_type"
-                value={formData.garment_type}
-                onChange={(e) => setFormData({ ...formData, garment_type: e.target.value })}
-                placeholder="e.g., Jacket, T-Shirt, Pants"
-                className="border-[3px] border-foreground font-editorial text-lg"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="color" className="font-ui uppercase tracking-wide">
-                Color *
-              </Label>
-              <Input
-                id="color"
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                placeholder="e.g., Black, Vintage Blue, Multi"
-                className="border-[3px] border-foreground font-editorial text-lg"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="size_fit" className="font-ui uppercase tracking-wide">
-                Size / Fit
-              </Label>
-              <Input
-                id="size_fit"
-                value={formData.size_fit}
-                onChange={(e) => setFormData({ ...formData, size_fit: e.target.value })}
-                placeholder="e.g., Large, Oversized, Slim fit"
-                className="border-[3px] border-foreground font-editorial text-lg"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="brand_social_link" className="font-ui uppercase tracking-wide">
-                Brand Social Link
-              </Label>
-              <Input
-                id="brand_social_link"
-                value={formData.brand_social_link}
-                onChange={(e) => setFormData({ ...formData, brand_social_link: e.target.value })}
-                placeholder="https://instagram.com/brand"
-                className="border-[3px] border-foreground font-editorial text-lg"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="description" className="font-ui uppercase tracking-wide">
-                Description
-              </Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Share the story behind this piece..."
-                className="border-[3px] border-foreground font-editorial text-lg min-h-32"
-                rows={4}
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4">
-            <Link
-              href="/profile"
-              className="flex-1 py-4 border-[3px] border-foreground font-display text-xl uppercase tracking-wide hover:bg-muted transition-colors text-center"
+          {/* Sticky-ish action row like upload */}
+          <div className="flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => router.push("/profile")}
+              className="px-4 py-2 rounded-full border border-zinc-300 bg-white text-sm text-zinc-900 hover:bg-zinc-50"
             >
               Cancel
-            </Link>
+            </button>
+
             <button
-              type="submit"
-              disabled={saving || !formData.brand || !formData.garment_type || !formData.color}
-              className="flex-1 py-4 bg-accent text-primary font-display text-xl uppercase tracking-wide brutalist-border hover:translate-x-1 hover:translate-y-1 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0"
+              type="button"
+              onClick={handleSubmit}
+              disabled={!canSave || saving}
+              className="px-5 py-2 rounded-full bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? "Saving..." : "Save changes"}
             </button>
           </div>
-        </form>
+        </div>
+
+        {/* RIGHT: sidebar (match upload) */}
+        <aside className="h-fit rounded-2xl border border-zinc-200 bg-white p-5">
+          <div className="text-sm font-semibold text-zinc-900">Checklist</div>
+
+          <ul className="mt-4 space-y-2 text-sm text-zinc-600">
+            <li className={formData.brand ? "text-zinc-900" : ""}>
+              {formData.brand ? "✓" : "•"} Brand
+            </li>
+            <li className={formData.garment_type ? "text-zinc-900" : ""}>
+              {formData.garment_type ? "✓" : "•"} Garment type
+            </li>
+            <li className={formData.color ? "text-zinc-900" : ""}>
+              {formData.color ? "✓" : "•"} Color
+            </li>
+            <li className={formData.brand_social_link ? "text-zinc-900" : ""}>
+              {formData.brand_social_link ? "✓" : "•"} Brand social link
+            </li>
+            <li className={formData.brand_website ? "text-zinc-900" : ""}>
+              {formData.brand_website ? "✓" : "•"} Brand website
+            </li>
+          </ul>
+
+        </aside>
       </div>
     </div>
-  );
+  </div>
+);
+
 }

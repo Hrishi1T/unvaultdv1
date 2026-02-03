@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { X, Upload } from "lucide-react";
 import Image from "next/image";
 import { createClient } from "../../../supabase/client";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
+// ✅ NEW: shared listing fields component (in the upload folder)
+import { ListingFormFields } from "./listing";
 
 interface UploadFormProps {
   userId: string;
@@ -41,6 +41,12 @@ export function UploadForm({ userId }: UploadFormProps) {
     setPreviewUrls((prev) => [...prev, ...urls]);
   };
 
+  const normalizeUrl = (url: string) => {
+    const trimmed = url.trim();
+    if (!trimmed) return "";
+    return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  };
+
   const removeImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
     URL.revokeObjectURL(previewUrls[index]);
@@ -53,8 +59,16 @@ export function UploadForm({ userId }: UploadFormProps) {
       return;
     }
 
-    if (!formData.brand || !formData.garment_type || !formData.color) {
-      alert("Please fill in all required fields (Brand, Garment Type, Color).");
+    if (
+      !formData.brand ||
+      !formData.garment_type ||
+      !formData.color ||
+      !formData.brand_social_link ||
+      !formData.brand_website
+    ) {
+      alert(
+        "Please fill in all required fields (Brand, Garment Type, Color, Brand Social Link, Brand Website).",
+      );
       return;
     }
 
@@ -91,7 +105,15 @@ export function UploadForm({ userId }: UploadFormProps) {
           garment_type: formData.garment_type,
           color: formData.color,
           size_fit: formData.size_fit || null,
-          brand_social_link: formData.brand_social_link || null,
+
+          brand_social_link: formData.brand_social_link
+            ? normalizeUrl(formData.brand_social_link)
+            : null,
+
+          brand_website: formData.brand_website
+            ? normalizeUrl(formData.brand_website)
+            : null,
+
           description: formData.description || null,
         })
         .select()
@@ -123,7 +145,9 @@ export function UploadForm({ userId }: UploadFormProps) {
     images.length > 0 &&
     !!formData.brand &&
     !!formData.garment_type &&
-    !!formData.color;
+    !!formData.color &&
+    !!formData.brand_social_link &&
+    !!formData.brand_website;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
@@ -189,148 +213,8 @@ export function UploadForm({ userId }: UploadFormProps) {
             </div>
           </section>
 
-          {/* Details */}
-          <section className="rounded-2xl border border-zinc-200 bg-white p-6">
-            <h2 className="text-base font-semibold text-zinc-900">Details</h2>
-
-            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <Label
-                  htmlFor="brand"
-                  className="text-xs font-medium text-zinc-700"
-                >
-                  Brand <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="brand"
-                  required
-                  value={formData.brand}
-                  onChange={(e) =>
-                    setFormData({ ...formData, brand: e.target.value })
-                  }
-                  placeholder="e.g., Nike, Vintage, Custom"
-                  className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="garment_type"
-                  className="text-xs font-medium text-zinc-700"
-                >
-                  Garment Type <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="garment_type"
-                  required
-                  value={formData.garment_type}
-                  onChange={(e) =>
-                    setFormData({ ...formData, garment_type: e.target.value })
-                  }
-                  placeholder="e.g., Jacket, T-Shirt, Pants"
-                  className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="color"
-                  className="text-xs font-medium text-zinc-700"
-                >
-                  Color <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="color"
-                  required
-                  value={formData.color}
-                  onChange={(e) =>
-                    setFormData({ ...formData, color: e.target.value })
-                  }
-                  placeholder="e.g., Black, Vintage Blue, Multi"
-                  className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="size_fit"
-                  className="text-xs font-medium text-zinc-700"
-                >
-                  Size / Fit
-                </Label>
-                <Input
-                  id="size_fit"
-                  value={formData.size_fit}
-                  onChange={(e) =>
-                    setFormData({ ...formData, size_fit: e.target.value })
-                  }
-                  placeholder="e.g., Large, Oversized, Slim fit"
-                  className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
-                />
-              </div>
-
-              <div className="space-y-2 sm:col-span-2">
-                <Label
-                  htmlFor="brand_social"
-                  className="text-xs font-medium text-zinc-700"
-                >
-                  Brand Social Link <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="brand_social"
-                  type="url"
-                  required
-                  value={formData.brand_social_link}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      brand_social_link: e.target.value,
-                    })
-                  }
-                  placeholder="https://instagram.com/brand"
-                  className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
-                />
-              </div>
-
-              <div className="space-y-2 sm:col-span-2">
-                <Label
-                  htmlFor="brand_website"
-                  className="text-xs font-medium text-zinc-700"
-                >
-                  Brand Website <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="brand_website"
-                  type="url"
-                  required
-                  value={formData.brand_website}
-                  onChange={(e) =>
-                    setFormData({ ...formData, brand_website: e.target.value })
-                  }
-                  placeholder="https://brand.com"
-                  className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
-                />
-              </div>
-
-              <div className="space-y-2 sm:col-span-2">
-                <Label
-                  htmlFor="description"
-                  className="text-xs font-medium text-zinc-700"
-                >
-                  Description
-                </Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  placeholder="Share the story behind this piece..."
-                  className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
-                />
-              </div>
-            </div>
-          </section>
+          {/* ✅ Details (shared component) */}
+          <ListingFormFields formData={formData} setFormData={setFormData} />
 
           {/* Sticky-ish action row like modern marketplaces */}
           <div className="flex items-center justify-end gap-3">
