@@ -20,6 +20,7 @@ interface Post {
     id: string;
     email: string | null;
     name: string | null;
+    username: string | null;
     avatar_url: string | null;
   };
   post_images: {
@@ -57,7 +58,7 @@ export function FeedGrid({ userId }: FeedGridProps) {
       .from("posts")
       .select(`
         *,
-        users!posts_user_id_fkey (id, email, name, avatar_url),
+        users!posts_user_id_fkey (id, email, name, username, avatar_url),
         post_images (id, image_url, order_index),
         likes (id, user_id),
         saves (id, user_id)

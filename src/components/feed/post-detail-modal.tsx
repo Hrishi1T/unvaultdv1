@@ -1,7 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { X, Heart, Bookmark, ChevronLeft, ChevronRight, MessageCircle, Edit, Trash2 } from "lucide-react";
+import { DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import {
+  X,
+  Heart,
+  Bookmark,
+  ChevronLeft,
+  ChevronRight,
+  MessageCircle,
+  Edit,
+  Trash2,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,7 +39,14 @@ interface PostDetailModalProps {
   onUpdate: () => void;
 }
 
-export function PostDetailModal({ post, userId, onClose, onLike, onSave, onUpdate }: PostDetailModalProps) {
+export function PostDetailModal({
+  post,
+  userId,
+  onClose,
+  onLike,
+  onSave,
+  onUpdate,
+}: PostDetailModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const router = useRouter();
@@ -37,7 +55,9 @@ export function PostDetailModal({ post, userId, onClose, onLike, onSave, onUpdat
   const isLiked = post.likes?.some((like: any) => like.user_id === userId);
   const isSaved = post.saves?.some((save: any) => save.user_id === userId);
   const isOwner = post.user_id === userId;
-  const images = post.post_images?.sort((a: any, b: any) => a.order_index - b.order_index) || [];
+  const images =
+    post.post_images?.sort((a: any, b: any) => a.order_index - b.order_index) ||
+    [];
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
@@ -57,17 +77,17 @@ export function PostDetailModal({ post, userId, onClose, onLike, onSave, onUpdat
   return (
     <>
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="max-w-7xl h-[90vh] p-0 border-[3px] border-foreground bg-background overflow-hidden">
-          <div className="flex h-full">
+        <DialogContent className="max-w-6xl h-[85vh] p-0 overflow-hidden bg-white border border-zinc-200 rounded-2xl shadow-xl">
+          <div className="flex h-full bg-white">
             {/* Image Section */}
-            <div className="flex-1 relative bg-muted flex items-center justify-center">
+            <div className="flex-1 relative overflow-hidden bg-black">
               {images[currentImageIndex] && (
-                <div className="relative w-full h-full">
+                <div className="relative w-full h-full bg-white">
                   <Image
                     src={images[currentImageIndex].image_url}
                     alt={`${post.brand} ${post.garment_type}`}
                     fill
-                    className="object-contain"
+                    className="object-cover"
                     sizes="60vw"
                   />
                 </div>
@@ -78,13 +98,13 @@ export function PostDetailModal({ post, userId, onClose, onLike, onSave, onUpdat
                 <>
                   <button
                     onClick={prevImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/70 backdrop-blur-sm border-2 border-secondary/50 text-secondary hover:bg-black/90 transition-all"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/90 backdrop-blur border border-zinc-200 text-zinc-700 hover:bg-white transition flex items-center justify-center"
                   >
                     <ChevronLeft className="w-6 h-6" />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/70 backdrop-blur-sm border-2 border-secondary/50 text-secondary hover:bg-black/90 transition-all"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/90 backdrop-blur border border-zinc-200 text-zinc-700 hover:bg-white transition flex items-center justify-center"
                   >
                     <ChevronRight className="w-6 h-6" />
                   </button>
@@ -98,8 +118,10 @@ export function PostDetailModal({ post, userId, onClose, onLike, onSave, onUpdat
                     <button
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        index === currentImageIndex ? "bg-accent w-8" : "bg-secondary/50"
+                      className={`h-2 rounded-full transition-all ${
+                        index === currentImageIndex
+                          ? "bg-zinc-900 w-8"
+                          : "bg-zinc-300 w-2"
                       }`}
                     />
                   ))}
@@ -109,67 +131,82 @@ export function PostDetailModal({ post, userId, onClose, onLike, onSave, onUpdat
               {/* Close button */}
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 bg-black/70 backdrop-blur-sm border-2 border-secondary/50 text-secondary hover:bg-black/90 transition-all"
+                className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/90 backdrop-blur border border-zinc-200 text-zinc-700 hover:bg-white transition flex items-center justify-center"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Metadata Sidebar */}
-            <div className="w-[400px] border-l-[3px] border-foreground flex flex-col">
+            <div className="w-[420px] border-l border-zinc-200 flex flex-col bg-white">
               {/* User info */}
-              <div className="p-6 border-b-[3px] border-foreground flex items-center justify-between">
-                <Link href={`/profile/${post.users?.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                  <Avatar className="w-12 h-12 border-2 border-foreground">
+              <div className="px-6 py-5 border-b border-zinc-200 flex items-center justify-between">
+                <Link
+                  href={`/profile/${post.users?.id}`}
+                  className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                >
+                  <Avatar className="w-11 h-11 border border-zinc-200">
                     <AvatarImage src={post.users?.avatar_url} />
-                    <AvatarFallback className="bg-accent text-primary font-display">
-                      {post.users?.name?.charAt(0)?.toUpperCase() || post.users?.email?.charAt(0)?.toUpperCase() || "U"}
+                    <AvatarFallback className="bg-zinc-100 text-zinc-800 font-medium">
+                      {post.users?.name?.charAt(0)?.toUpperCase() ||
+                        post.users?.username?.charAt(0)?.toUpperCase() ||
+                        "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-ui font-semibold">{post.users?.name || "Anonymous"}</p>
-                    <p className="text-sm opacity-70">{post.users?.email}</p>
+                    <p className="text-sm font-medium text-zinc-900">
+                      {post.users?.name || "Anonymous"}
+                    </p>
+                    <p className="text-xs text-zinc-500">@{post.users?.username || `user_${post.user_id?.slice(0, 8)}`}</p>
                   </div>
                 </Link>
 
                 {!isOwner && (
                   <Link
                     href={`/messages?user=${post.users?.id}`}
-                    className="p-2 hover:bg-muted transition-colors"
+                    className="h-9 w-9 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-700 hover:bg-zinc-50 transition"
                   >
-                    <MessageCircle className="w-5 h-5" />
+                    <MessageCircle className="w-4 h-4" />
                   </Link>
                 )}
               </div>
 
               {/* Metadata */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
                 <div>
-                  <h2 className="font-display text-3xl uppercase mb-2">{post.brand}</h2>
-                  <p className="font-editorial text-lg opacity-90">{post.garment_type}</p>
+                  <h2 className="text-xl font-semibold text-zinc-900 leading-tight">
+                    {post.brand}
+                  </h2>
+                  <p className="text-sm text-zinc-600">{post.garment_type}</p>
                 </div>
 
-                <div className="space-y-3 font-editorial">
+                <div className="space-y-4">
                   <div>
-                    <span className="text-sm uppercase font-ui opacity-70">Color</span>
-                    <p className="text-lg">{post.color}</p>
+                    <span className="text-[11px] uppercase tracking-wide text-zinc-500">
+                      Color
+                    </span>
+                    <p className="text-sm text-zinc-900">{post.color}</p>
                   </div>
 
                   {post.size_fit && (
                     <div>
-                      <span className="text-sm uppercase font-ui opacity-70">Size / Fit</span>
-                      <p className="text-lg">{post.size_fit}</p>
+                      <span className="text-[11px] uppercase tracking-wide text-zinc-500">
+                        Size / Fit
+                      </span>
+                      <p className="text-sm text-zinc-900">{post.size_fit}</p>
                     </div>
                   )}
 
                   {post.brand_social_link && (
                     <div>
-                      <span className="text-sm uppercase font-ui opacity-70">Brand Link</span>
+                      <span className="text-[11px] uppercase tracking-wide text-zinc-500">
+                        Brand Link
+                      </span>
                       <a
                         href={post.brand_social_link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-lg text-accent hover:underline block truncate"
+                        className="text-sm text-blue-600 hover:underline block truncate"
                       >
                         {post.brand_social_link}
                       </a>
@@ -178,14 +215,19 @@ export function PostDetailModal({ post, userId, onClose, onLike, onSave, onUpdat
 
                   {post.description && (
                     <div>
-                      <span className="text-sm uppercase font-ui opacity-70">Description</span>
-                      <p className="text-lg leading-relaxed">{post.description}</p>
+                      <span className="text-[11px] uppercase tracking-wide text-zinc-500">
+                        Description
+                      </span>
+                      <p className="text-sm text-zinc-900 leading-relaxed">
+                        {post.description}
+                      </p>
                     </div>
                   )}
                 </div>
 
-                <div className="text-sm font-ui opacity-50">
-                  Posted {new Date(post.created_at).toLocaleDateString("en-US", {
+                <div className="text-xs text-zinc-500">
+                  Posted{" "}
+                  {new Date(post.created_at).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
@@ -194,29 +236,29 @@ export function PostDetailModal({ post, userId, onClose, onLike, onSave, onUpdat
               </div>
 
               {/* Actions */}
-              <div className="p-6 border-t-[3px] border-foreground space-y-3">
+              <div className="px-6 py-5 border-t border-zinc-200 space-y-3 bg-white">
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => onLike(post.id)}
-                    className={`flex items-center gap-2 px-6 py-3 flex-1 justify-center border-[3px] transition-all duration-200 ${
+                    className={`flex items-center gap-2 px-4 py-2.5 flex-1 justify-center rounded-full border text-sm transition ${
                       isLiked
-                        ? "bg-accent border-accent text-primary scale-105"
-                        : "border-foreground hover:bg-muted"
+                        ? "bg-zinc-900 border-zinc-900 text-white"
+                        : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50"
                     }`}
                   >
-                    <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
+                    <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
                     <span className="font-ui font-semibold">{post._count?.likes || 0}</span>
                   </button>
 
                   <button
                     onClick={() => onSave(post.id)}
-                    className={`flex items-center gap-2 px-6 py-3 flex-1 justify-center border-[3px] transition-all duration-200 ${
+                    className={`flex items-center gap-2 px-4 py-2.5 flex-1 justify-center rounded-full border text-sm transition ${
                       isSaved
-                        ? "bg-accent border-accent text-primary scale-105"
-                        : "border-foreground hover:bg-muted"
+                        ? "bg-zinc-900 border-zinc-900 text-white"
+                        : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50"
                     }`}
                   >
-                    <Bookmark className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
+                    <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
                     <span className="font-ui font-semibold">{post._count?.saves || 0}</span>
                   </button>
                 </div>
@@ -225,14 +267,14 @@ export function PostDetailModal({ post, userId, onClose, onLike, onSave, onUpdat
                   <div className="flex gap-3">
                     <Link
                       href={`/edit/${post.id}`}
-                      className="flex items-center gap-2 px-4 py-3 flex-1 justify-center border-[3px] border-foreground hover:bg-muted transition-colors font-ui"
+                      className="flex items-center gap-2 px-4 py-2.5 flex-1 justify-center rounded-full border border-zinc-200 text-sm text-zinc-800 hover:bg-zinc-50 transition"
                     >
                       <Edit className="w-4 h-4" />
                       Edit
                     </Link>
                     <button
                       onClick={() => setShowDeleteDialog(true)}
-                      className="flex items-center gap-2 px-4 py-3 flex-1 justify-center border-[3px] border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors font-ui"
+                      className="flex items-center gap-2 px-4 py-2.5 flex-1 justify-center rounded-full border border-red-200 text-sm text-red-600 hover:bg-red-50 transition"
                     >
                       <Trash2 className="w-4 h-4" />
                       Delete
@@ -246,18 +288,23 @@ export function PostDetailModal({ post, userId, onClose, onLike, onSave, onUpdat
       </Dialog>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="border-[3px] border-foreground">
+        <AlertDialogContent className="bg-white border border-zinc-200 rounded-2xl shadow-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-display text-2xl">Delete Post?</AlertDialogTitle>
-            <AlertDialogDescription className="font-editorial text-base">
-              This action cannot be undone. This will permanently delete your post and remove all associated data.
+            <AlertDialogTitle className="text-lg font-semibold text-zinc-900">
+              Delete Post?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-zinc-600">
+              This action cannot be undone. This will permanently delete your post
+              and remove all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-[3px] border-foreground font-ui">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-full border border-zinc-200 px-4 py-2 text-sm hover:bg-zinc-50">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="border-[3px] border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 font-ui"
+              className="rounded-full bg-red-600 text-white px-4 py-2 text-sm hover:bg-red-700"
             >
               Delete
             </AlertDialogAction>

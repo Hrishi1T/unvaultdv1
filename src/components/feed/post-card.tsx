@@ -24,7 +24,12 @@ export function PostCard({ post, userId, onLike, onSave, onClick, style }: PostC
     return imgs?.[0];
   }, [post.post_images]);
 
-  const author = post.users?.name || post.users?.email || "Unknown";
+  const author =
+  (post.users?.username ? `@${post.users.username}` : null) ||
+  post.users?.name ||
+  post.users?.email ||
+  "Anonymous";
+
 
   return (
     <div
