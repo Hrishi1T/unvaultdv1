@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { createClient } from "../../../supabase/client";
 import { useRouter } from "next/navigation";
+import { FollowButton } from "@/components/follow/follow-button";
 
 interface PostDetailModalProps {
   post: any;
@@ -57,12 +58,27 @@ export function PostDetailModal({
 }: PostDetailModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
   const isLiked = post.likes?.some((like: any) => like.user_id === userId);
   const isSaved = post.saves?.some((save: any) => save.user_id === userId);
   const isOwner = post.user_id === userId;
+
+  // Check follow state
+  useState(() => {
+    if (userId && !isOwner && post.users?.id) {
+      supabase
+        .from("follows")
+        .select("id")
+        .match({ follower_id: userId, following_id: post.users.id })
+        .single()
+        .then(({ data }) => {
+          setIsFollowingAuthor(!!data);
+        });
+    }
+  });
 
   const images =
     post.post_images?.sort((a: any, b: any) => a.order_index - b.order_index) ||
@@ -189,13 +205,22 @@ export function PostDetailModal({
                 </Link>
 
                 {!isOwner && (
-                  <Link
-                    href={`/messages?user=${post.users?.id}`}
-                    className="h-9 w-9 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-700 hover:bg-zinc-50 transition"
-                    aria-label="Message user"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <FollowButton
+                      targetUserId={post.users?.id}
+                      currentUserId={userId || null}
+                      isFollowing={isFollowingAuthor}
+                      onToggle={() => setIsFollowingAuthor(!isFollowingAuthor)}
+                      size="sm"
+                    />
+                    <Link
+                      href={`/messages?user=${post.users?.id}`}
+                      className="h-9 w-9 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-700 hover:bg-zinc-50 transition"
+                      aria-label="Message user"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </Link>
+                  </div>
                 )}
               </div>
 

@@ -44,10 +44,12 @@ export function FeedGrid({ userId }: FeedGridProps) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const supabase = createClient();
 
   useEffect(() => {
     loadPosts();
+    loadFollowing();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -107,6 +109,37 @@ export function FeedGrid({ userId }: FeedGridProps) {
     loadPosts();
   };
 
+  const loadFollowing = async () => {
+    if (!userId) return;
+    const { data } = await supabase
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", userId);
+    const ids = new Set((data || []).map((f: any) => f.following_id));
+    setFollowingIds(ids);
+  };
+
+  const handleFollow = async (targetUserId: string) => {
+    if (!userId) return;
+    const isFollowing = followingIds.has(targetUserId);
+    if (isFollowing) {
+      await supabase
+        .from("follows")
+        .delete()
+        .match({ follower_id: userId, following_id: targetUserId });
+      setFollowingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(targetUserId);
+        return next;
+      });
+    } else {
+      await supabase
+        .from("follows")
+        .insert({ follower_id: userId, following_id: targetUserId });
+      setFollowingIds((prev) => new Set(prev).add(targetUserId));
+    }
+  };
+
   if (loading) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-4">
@@ -138,6 +171,8 @@ export function FeedGrid({ userId }: FeedGridProps) {
               onLike={handleLike}
               onSave={handleSave}
               onClick={() => setSelectedPost(post)}
+              followingIds={followingIds}
+              onFollow={handleFollow}
             />
           ))}
         </div>

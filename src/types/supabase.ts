@@ -68,6 +68,42 @@ export type Database = {
         }
         Relationships: []
       }
+      follows: {
+        Row: {
+          created_at: string | null
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           created_at: string | null
@@ -179,6 +215,7 @@ export type Database = {
         Row: {
           brand: string
           brand_social_link: string | null
+          brand_website: string | null
           color: string
           created_at: string | null
           description: string | null
@@ -191,6 +228,7 @@ export type Database = {
         Insert: {
           brand: string
           brand_social_link?: string | null
+          brand_website?: string | null
           color: string
           created_at?: string | null
           description?: string | null
@@ -203,6 +241,7 @@ export type Database = {
         Update: {
           brand?: string
           brand_social_link?: string | null
+          brand_website?: string | null
           color?: string
           created_at?: string | null
           description?: string | null

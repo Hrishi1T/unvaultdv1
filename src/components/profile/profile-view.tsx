@@ -13,6 +13,8 @@ import { Pencil, X, Camera, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FollowButton } from "@/components/follow/follow-button";
+import { FollowListModal } from "@/components/follow/follow-list-modal";
 
 type AnyPost = any;
 
@@ -38,6 +40,12 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
   const [activeTab, setActiveTab] = useState<"posts" | "likes" | "saved">(
     "posts",
   );
+
+  // Follow state
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [isFollowingUser, setIsFollowingUser] = useState(false);
+  const [followListType, setFollowListType] = useState<"followers" | "following" | null>(null);
 
   // Edit profile state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -167,6 +175,29 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
       setSavedPosts([]);
       setLikedPosts([]);
       setActiveTab("posts");
+    }
+
+    // Load follow counts
+    const { count: followers } = await supabase
+      .from("follows")
+      .select("*", { count: "exact", head: true })
+      .eq("following_id", userId);
+    setFollowerCount(followers || 0);
+
+    const { count: following } = await supabase
+      .from("follows")
+      .select("*", { count: "exact", head: true })
+      .eq("follower_id", userId);
+    setFollowingCount(following || 0);
+
+    // Check if current user follows this profile
+    if (currentUserId && currentUserId !== userId) {
+      const { data: followRow } = await supabase
+        .from("follows")
+        .select("id")
+        .match({ follower_id: currentUserId, following_id: userId })
+        .single();
+      setIsFollowingUser(!!followRow);
     }
 
     setLoading(false);
@@ -469,13 +500,33 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
             <span className="font-semibold text-zinc-900">{posts.length}</span>{" "}
             Posts
           </span>
-          <span>
-            <span className="font-semibold text-zinc-900">0</span> Followers
-          </span>
-          <span>
-            <span className="font-semibold text-zinc-900">0</span> Following
-          </span>
+          <button
+            onClick={() => setFollowListType("followers")}
+            className="hover:underline"
+          >
+            <span className="font-semibold text-zinc-900">{followerCount}</span>{" "}
+            Followers
+          </button>
+          <button
+            onClick={() => setFollowListType("following")}
+            className="hover:underline"
+          >
+            <span className="font-semibold text-zinc-900">{followingCount}</span>{" "}
+            Following
+          </button>
         </div>
+
+        {/* Follow button for other users' profiles */}
+        {!isOwnProfile && currentUserId && (
+          <div className="mt-4">
+            <FollowButton
+              targetUserId={userId}
+              currentUserId={currentUserId}
+              isFollowing={isFollowingUser}
+              onToggle={loadProfileData}
+            />
+          </div>
+        )}
 
         {/* Tabs + Content constrained to match the post card column */}
         <div className="mt-6 w-full">
@@ -655,6 +706,17 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Follow List Modal */}
+      {followListType && (
+        <FollowListModal
+          userId={userId}
+          currentUserId={currentUserId}
+          type={followListType}
+          onClose={() => setFollowListType(null)}
+          onFollowChange={loadProfileData}
+        />
       )}
     </>
   );
