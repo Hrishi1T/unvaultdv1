@@ -43,8 +43,9 @@ export default function GoogleAuth({
 
       // Send the user to Supabase -> Google, then back to /auth/callback
       const callbackUrl =
-        `${window.location.origin}/auth/callback?redirect_to=` +
-        encodeURIComponent(redirectTo);
+  `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirect_to=` +
+  encodeURIComponent(redirectTo);
+
 
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
