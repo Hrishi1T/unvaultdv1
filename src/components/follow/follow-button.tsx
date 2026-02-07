@@ -1,94 +1,91 @@
 "use client";
 
 import { useState } from "react";
-import { UserPlus, UserCheck } from "lucide-react";
 import { createClient } from "../../../supabase/client";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
 interface FollowButtonProps {
   targetUserId: string;
   currentUserId: string | null;
   isFollowing: boolean;
-  onToggle?: () => void;
-  size?: "sm" | "md";
-  variant?: "default" | "inline";
+  /** Direct state setter for isFollowing (used from profile view) */
+  setIsFollowing?: (v: boolean) => void;
+  /** Direct state updater for follower count (used from profile view) */
+  setFollowerCount?: (fn: (n: number) => number) => void;
+  /** Callback fired after follow/unfollow completes */
+  onToggle?: () => void | Promise<void>;
+  /** Button size variant */
+  size?: "default" | "sm";
 }
 
 export function FollowButton({
   targetUserId,
+  isFollowing,
+  setIsFollowing,
+  setFollowerCount,
   currentUserId,
-  isFollowing: initialFollowing,
   onToggle,
-  size = "md",
-  variant = "default",
+  size = "default",
 }: FollowButtonProps) {
-  const [isFollowing, setIsFollowing] = useState(initialFollowing);
-  const [isLoading, setIsLoading] = useState(false);
-  const supabase = createClient();
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const supabase = createClient();
 
-  // Don't show follow button for own profile
+  // Don't render if user is viewing their own content
   if (currentUserId === targetUserId) return null;
 
-  const handleToggle = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
+  async function handleClick() {
     if (!currentUserId) {
       router.push("/sign_in_auth/sign-in");
       return;
     }
 
-    setIsLoading(true);
-    try {
-      if (isFollowing) {
-        await supabase
-          .from("follows")
-          .delete()
-          .match({ follower_id: currentUserId, following_id: targetUserId });
-        setIsFollowing(false);
-      } else {
-        await supabase
-          .from("follows")
-          .insert({ follower_id: currentUserId, following_id: targetUserId });
-        setIsFollowing(true);
-      }
-      onToggle?.();
-    } catch (error) {
-      console.error("Follow toggle error:", error);
-    } finally {
-      setIsLoading(false);
+    setLoading(true);
+
+    if (isFollowing) {
+      await supabase
+        .from("follows")
+        .delete()
+        .match({
+          follower_id: currentUserId,
+          following_id: targetUserId,
+        });
+
+      setIsFollowing?.(false);
+      setFollowerCount?.((n) => Math.max(0, n - 1));
+    } else {
+      await supabase.from("follows").insert({
+        follower_id: currentUserId,
+        following_id: targetUserId,
+      });
+
+      setIsFollowing?.(true);
+      setFollowerCount?.((n) => n + 1);
     }
-  };
 
-  const sizeClasses =
-    size === "sm"
-      ? "px-3 py-1.5 text-xs gap-1.5"
-      : "px-4 py-2 text-sm gap-2";
+    await onToggle?.();
+    setLoading(false);
+  }
 
-  const baseClasses = `inline-flex items-center justify-center rounded-full border font-medium transition-all duration-200 disabled:opacity-50 ${sizeClasses}`;
-
-  const stateClasses = isFollowing
-    ? "bg-white border-zinc-300 text-zinc-700 hover:border-red-300 hover:text-red-600 hover:bg-red-50"
-    : "bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800";
+  const isSmall = size === "sm";
 
   return (
-    <button
-      onClick={handleToggle}
-      disabled={isLoading}
-      className={`${baseClasses} ${stateClasses}`}
+    <Button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleClick();
+      }}
+      disabled={loading}
+      variant={isFollowing ? "outline" : "default"}
+      size={isSmall ? "sm" : "default"}
+      className={
+        isSmall
+          ? "h-8 px-4 text-xs rounded-full"
+          : "w-full sm:w-auto rounded-full"
+      }
     >
-      {isFollowing ? (
-        <>
-          <UserCheck className={size === "sm" ? "w-3.5 h-3.5" : "w-4 h-4"} />
-          <span>Following</span>
-        </>
-      ) : (
-        <>
-          <UserPlus className={size === "sm" ? "w-3.5 h-3.5" : "w-4 h-4"} />
-          <span>Follow</span>
-        </>
-      )}
-    </button>
+      {isFollowing ? "Following" : "Follow"}
+    </Button>
   );
 }

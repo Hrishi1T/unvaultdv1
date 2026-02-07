@@ -523,7 +523,8 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
               targetUserId={userId}
               currentUserId={currentUserId}
               isFollowing={isFollowingUser}
-              onToggle={loadProfileData}
+              setIsFollowing={setIsFollowingUser}
+              setFollowerCount={setFollowerCount}
             />
           </div>
         )}

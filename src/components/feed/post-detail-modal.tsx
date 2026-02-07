@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
@@ -66,8 +66,8 @@ export function PostDetailModal({
   const isSaved = post.saves?.some((save: any) => save.user_id === userId);
   const isOwner = post.user_id === userId;
 
-  // Check follow state
-  useState(() => {
+  // Check follow state on mount
+  useEffect(() => {
     if (userId && !isOwner && post.users?.id) {
       supabase
         .from("follows")
@@ -78,7 +78,8 @@ export function PostDetailModal({
           setIsFollowingAuthor(!!data);
         });
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, post.users?.id]);
 
   const images =
     post.post_images?.sort((a: any, b: any) => a.order_index - b.order_index) ||

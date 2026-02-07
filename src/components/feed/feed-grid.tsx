@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "../../../supabase/client";
+import { createClient } from "@/supabase/client";
 import { PostCard } from "./post-card";
 import { PostDetailModal } from "./post-detail-modal";
 import { Skeleton } from "@/components/ui/skeleton";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../supabase/client";
 import { PostCard } from "./post-card";
@@ -44,8 +44,50 @@ interface PublicFeedGridProps {
 export function PublicFeedGrid({ posts: initialPosts, userId }: PublicFeedGridProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const supabase = createClient();
   const router = useRouter();
+
+  useEffect(() => {
+    if (userId) {
+      loadFollowing();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
+  const loadFollowing = async () => {
+    if (!userId) return;
+    const { data } = await supabase
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", userId);
+    const ids = new Set((data || []).map((f: any) => f.following_id));
+    setFollowingIds(ids);
+  };
+
+  const handleFollow = async (targetUserId: string) => {
+    if (!userId) {
+      router.push("/sign_in_auth/sign-in");
+      return;
+    }
+    const isFollowing = followingIds.has(targetUserId);
+    if (isFollowing) {
+      await supabase
+        .from("follows")
+        .delete()
+        .match({ follower_id: userId, following_id: targetUserId });
+      setFollowingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(targetUserId);
+        return next;
+      });
+    } else {
+      await supabase
+        .from("follows")
+        .insert({ follower_id: userId, following_id: targetUserId });
+      setFollowingIds((prev) => new Set(prev).add(targetUserId));
+    }
+  };
 
   const refreshPosts = async () => {
     const { data } = await supabase
@@ -142,6 +184,8 @@ export function PublicFeedGrid({ posts: initialPosts, userId }: PublicFeedGridPr
             onLike={handleLike}
             onSave={handleSave}
             onClick={() => setSelectedPost(post)}
+            followingIds={followingIds}
+            onFollow={handleFollow}
           />
         ))}
       </div>
