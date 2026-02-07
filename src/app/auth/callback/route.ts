@@ -56,6 +56,26 @@ export async function GET(request: Request) {
     }
   }
 
-  const redirectTo = redirect_to || "/";
-  return NextResponse.redirect(new URL(redirectTo, requestUrl.origin));
+const redirectTo = redirect_to || "/";
+
+// Prefer explicit public URL if you set it (recommended)
+const publicOrigin = process.env.NEXT_PUBLIC_SITE_URL;
+
+// Otherwise derive from proxy headers (Render sets these)
+const proto = request.headers.get("x-forwarded-proto") || "http";
+const host =
+  request.headers.get("x-forwarded-host") ||
+  request.headers.get("host") ||
+  new URL(request.url).host;
+
+const origin = publicOrigin || `${proto}://${host}`;
+
+// If redirectTo is absolute, keep it. If relative, resolve against origin.
+const target =
+  redirectTo.startsWith("http://") || redirectTo.startsWith("https://")
+    ? redirectTo
+    : new URL(redirectTo, origin).toString();
+
+return NextResponse.redirect(target);
+
 }
