@@ -116,9 +116,9 @@ export function PostDetailModal({
             </DialogTitle>
           </VisuallyHidden>
 
-          <div className="flex h-full flex-col bg-white">
+          <div className="flex h-full flex-col md:flex-row bg-white">
             {/* Image Section */}
-            <div className="relative w-full h-[56%] min-h-[280px] overflow-hidden bg-zinc-100">
+            <div className="relative w-full h-[56%] min-h-[280px] overflow-hidden bg-zinc-100 md:h-full md:min-h-0 md:w-3/5">
               {images[currentImageIndex] && (
                 <div className="relative w-full h-full bg-zinc-100">
                   <Image
@@ -126,7 +126,7 @@ export function PostDetailModal({
                     alt={`${post.brand} ${post.garment_type}`}
                     fill
                     className="object-contain"
-                    sizes="(max-width: 768px) 100vw, 70vw"
+                    sizes="(max-width: 768px) 100vw, 60vw"
                   />
                 </div>
               )}
@@ -180,7 +180,7 @@ export function PostDetailModal({
             </div>
 
             {/* Metadata Sidebar */}
-            <div className="w-full h-[44%] border-t border-zinc-200 flex flex-col bg-white min-h-0">
+            <div className="w-full h-[44%] border-t border-zinc-200 flex flex-col bg-white min-h-0 md:h-full md:w-2/5 md:border-t-0 md:border-l">
               {/* User info */}
               <div className="px-6 py-5 border-b border-zinc-200 flex items-center justify-between">
                 <Link
@@ -214,9 +214,33 @@ export function PostDetailModal({
                       onToggle={() => setIsFollowingAuthor(!isFollowingAuthor)}
                       size="sm"
                     />
+                    <button
+                      onClick={() => onLike(post.id)}
+                      className={`md:hidden h-9 w-9 rounded-full border flex items-center justify-center transition ${
+                        isLiked
+                          ? "bg-zinc-900 border-zinc-900 text-white"
+                          : "border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                      }`}
+                      aria-label="Like post"
+                    >
+                      <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
+                    </button>
+                    <button
+                      onClick={() => onSave(post.id)}
+                      className={`md:hidden h-9 w-9 rounded-full border flex items-center justify-center transition ${
+                        isSaved
+                          ? "bg-zinc-900 border-zinc-900 text-white"
+                          : "border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                      }`}
+                      aria-label="Save post"
+                    >
+                      <Bookmark
+                        className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`}
+                      />
+                    </button>
                     <Link
                       href={`/messages?user=${post.users?.id}`}
-                      className="h-9 w-9 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-700 hover:bg-zinc-50 transition"
+                      className="hidden md:flex h-9 w-9 rounded-full border border-zinc-200 items-center justify-center text-zinc-700 hover:bg-zinc-50 transition"
                       aria-label="Message user"
                     >
                       <MessageCircle className="w-4 h-4" />
