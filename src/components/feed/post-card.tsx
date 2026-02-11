@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Heart, Bookmark, UserPlus, UserCheck } from "lucide-react";
+import { UserPlus, UserCheck } from "lucide-react";
 import Image from "next/image";
 
 interface PostCardProps {
@@ -99,38 +99,6 @@ export function PostCard({ post, userId, onLike, onSave, onClick, style, followi
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onLike(post.id);
-            }}
-            className={`w-9 h-9 rounded-full border transition-colors grid place-items-center ${
-              isLiked
-                ? "bg-black text-white border-black"
-                : "bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50"
-            }`}
-            aria-label="Like"
-          >
-            <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
-          </button>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onSave(post.id);
-            }}
-            className={`w-9 h-9 rounded-full border transition-colors grid place-items-center ${
-              isSaved
-                ? "bg-black text-white border-black"
-                : "bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50"
-            }`}
-            aria-label="Save"
-          >
-            <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
-          </button>
-        </div>
       </div>
     </div>
   );

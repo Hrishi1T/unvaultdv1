@@ -109,24 +109,24 @@ export function PostDetailModal({
   return (
     <>
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="max-w-6xl h-[85vh] p-0 overflow-hidden bg-white border border-zinc-200 rounded-2xl shadow-xl">
+        <DialogContent className="max-w-4xl h-[85vh] p-0 overflow-hidden bg-white border border-zinc-200 rounded-2xl shadow-xl">
           <VisuallyHidden>
             <DialogTitle>
               {post.brand ? `${post.brand} post details` : "Post details"}
             </DialogTitle>
           </VisuallyHidden>
 
-          <div className="flex h-full bg-white">
+          <div className="flex h-full flex-col bg-white">
             {/* Image Section */}
-            <div className="flex-1 relative overflow-hidden bg-black">
+            <div className="relative w-full h-[56%] min-h-[280px] overflow-hidden bg-zinc-100">
               {images[currentImageIndex] && (
-                <div className="relative w-full h-full bg-white">
+                <div className="relative w-full h-full bg-zinc-100">
                   <Image
                     src={images[currentImageIndex].image_url}
                     alt={`${post.brand} ${post.garment_type}`}
                     fill
-                    className="object-cover"
-                    sizes="60vw"
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, 70vw"
                   />
                 </div>
               )}
@@ -180,7 +180,7 @@ export function PostDetailModal({
             </div>
 
             {/* Metadata Sidebar */}
-            <div className="w-[420px] border-l border-zinc-200 flex flex-col bg-white">
+            <div className="w-full h-[44%] border-t border-zinc-200 flex flex-col bg-white min-h-0">
               {/* User info */}
               <div className="px-6 py-5 border-b border-zinc-200 flex items-center justify-between">
                 <Link
@@ -264,25 +264,6 @@ export function PostDetailModal({
                         className="text-sm text-blue-600 hover:underline block truncate"
                       >
                         {brandWebsite}
-                      </a>
-                    </div>
-                  )}
-
-                  {/* ✅ New: Instagram link */}
-                  {instagramUrl && (
-                    <div>
-                      <a
-                        href={instagramUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-1 inline-flex items-center gap-2 text-sm text-zinc-800 hover:underline"
-                        aria-label="Open Instagram"
-                      >
-                        <Instagram className="w-4 h-4 text-zinc-700" />
-                        Instagram
-                      </a>
-                      <a className="text-xs text-zinc-500 truncate mt-1">
-                        {instagramUrl}
                       </a>
                     </div>
                   )}
