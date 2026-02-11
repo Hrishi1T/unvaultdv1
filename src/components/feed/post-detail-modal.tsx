@@ -31,6 +31,7 @@ import {
 import { createClient } from "../../../supabase/client";
 import { useRouter } from "next/navigation";
 import { FollowButton } from "@/components/follow/follow-button";
+import { openSignInModal } from "@/lib/open-sign-in-modal";
 
 interface PostDetailModalProps {
   post: any;
@@ -100,6 +101,13 @@ export function PostDetailModal({
     setShowDeleteDialog(false);
     onClose();
     onUpdate();
+  };
+
+  const handleMessageClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (userId) return;
+    e.preventDefault();
+    const opened = openSignInModal();
+    if (!opened) router.push("/sign_in_auth/sign-in");
   };
 
   // ✅ New: separate links
@@ -240,6 +248,7 @@ export function PostDetailModal({
                     </button>
                     <Link
                       href={`/messages?user=${post.users?.id}`}
+                      onClick={handleMessageClick}
                       className="hidden md:flex h-9 w-9 rounded-full border border-zinc-200 items-center justify-center text-zinc-700 hover:bg-zinc-50 transition"
                       aria-label="Message user"
                     >

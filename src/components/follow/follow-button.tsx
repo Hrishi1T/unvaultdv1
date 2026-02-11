@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "../../../supabase/client";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { openSignInModal } from "@/lib/open-sign-in-modal";
 
 interface FollowButtonProps {
   targetUserId: string;
@@ -37,7 +38,8 @@ export function FollowButton({
 
   async function handleClick() {
     if (!currentUserId) {
-      router.push("/sign_in_auth/sign-in");
+      const opened = openSignInModal();
+      if (!opened) router.push("/sign_in_auth/sign-in");
       return;
     }
 

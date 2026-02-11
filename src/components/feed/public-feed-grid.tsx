@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "../../../supabase/client";
 import { PostCard } from "./post-card";
 import { PostDetailModal } from "./post-detail-modal";
+import { openSignInModal } from "@/lib/open-sign-in-modal";
 
 interface Post {
   id: string;
@@ -67,7 +68,8 @@ export function PublicFeedGrid({ posts: initialPosts, userId }: PublicFeedGridPr
 
   const handleFollow = async (targetUserId: string) => {
     if (!userId) {
-      router.push("/sign_in_auth/sign-in");
+      const opened = openSignInModal();
+      if (!opened) router.push("/sign_in_auth/sign-in");
       return;
     }
     const isFollowing = followingIds.has(targetUserId);
@@ -127,8 +129,8 @@ export function PublicFeedGrid({ posts: initialPosts, userId }: PublicFeedGridPr
 
   const handleLike = async (postId: string) => {
     if (!userId) {
-      // Redirect to sign in if not authenticated
-      router.push("/sign_in_auth/sign-in");
+      const opened = openSignInModal();
+      if (!opened) router.push("/sign_in_auth/sign-in");
       return;
     }
 
@@ -146,8 +148,8 @@ export function PublicFeedGrid({ posts: initialPosts, userId }: PublicFeedGridPr
 
   const handleSave = async (postId: string) => {
     if (!userId) {
-      // Redirect to sign in if not authenticated
-      router.push("/sign_in_auth/sign-in");
+      const opened = openSignInModal();
+      if (!opened) router.push("/sign_in_auth/sign-in");
       return;
     }
 
