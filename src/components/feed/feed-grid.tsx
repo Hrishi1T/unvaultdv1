@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "../../../supabase/client";
 import { PostCard } from "./post-card";
 import { PostDetailModal } from "./post-detail-modal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Post {
   id: string;
@@ -41,6 +43,8 @@ interface FeedGridProps {
 }
 
 export function FeedGrid({ userId }: FeedGridProps) {
+  const router = useRouter();
+  const isMobile = useIsMobile();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -52,6 +56,12 @@ export function FeedGrid({ userId }: FeedGridProps) {
     loadFollowing();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (isMobile && selectedPost) {
+      setSelectedPost(null);
+    }
+  }, [isMobile, selectedPost]);
 
   // ✅ DO NOT TOUCH SUPABASE QUERY LOGIC
   const loadPosts = async () => {
@@ -140,6 +150,14 @@ export function FeedGrid({ userId }: FeedGridProps) {
     }
   };
 
+  const handlePostClick = (post: Post) => {
+    if (isMobile) {
+      router.push(`/listing/${post.id}`);
+      return;
+    }
+    setSelectedPost(post);
+  };
+
   if (loading) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-4">
@@ -170,7 +188,7 @@ export function FeedGrid({ userId }: FeedGridProps) {
               userId={userId}
               onLike={handleLike}
               onSave={handleSave}
-              onClick={() => setSelectedPost(post)}
+              onClick={() => handlePostClick(post)}
               followingIds={followingIds}
               onFollow={handleFollow}
             />
@@ -178,7 +196,7 @@ export function FeedGrid({ userId }: FeedGridProps) {
         </div>
       </div>
 
-      {selectedPost && (
+      {selectedPost && !isMobile && (
         <PostDetailModal
           post={selectedPost}
           userId={userId}

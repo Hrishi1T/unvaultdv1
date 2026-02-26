@@ -32,6 +32,7 @@ import { createClient } from "../../../supabase/client";
 import { useRouter } from "next/navigation";
 import { FollowButton } from "@/components/follow/follow-button";
 import { openSignInModal } from "@/lib/open-sign-in-modal";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PostDetailModalProps {
   post: any;
@@ -57,6 +58,7 @@ export function PostDetailModal({
   onSave,
   onUpdate,
 }: PostDetailModalProps) {
+  const isMobile = useIsMobile();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
@@ -113,6 +115,14 @@ export function PostDetailModal({
   // ✅ New: separate links
   const brandWebsite = safeUrl(post.brand_website);
   const instagramUrl = safeUrl(post.brand_social_link); // treating this as Instagram
+
+  useEffect(() => {
+    if (!isMobile) return;
+    onClose();
+    router.push(`/listing/${post.id}`);
+  }, [isMobile, onClose, post.id, router]);
+
+  if (isMobile) return null;
 
   return (
     <>

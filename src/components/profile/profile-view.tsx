@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "../../../supabase/client";
 import { FeedHeader } from "@/components/feed/feed-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FollowButton } from "@/components/follow/follow-button";
 import { FollowListModal } from "@/components/follow/follow-list-modal";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type AnyPost = any;
 
@@ -24,6 +26,8 @@ interface ProfileViewProps {
 }
 
 export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
+  const router = useRouter();
+  const isMobile = useIsMobile();
   const supabase = createClient();
 
   const [authUser, setAuthUser] = useState<UserIcon | null>(null);
@@ -90,6 +94,12 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
     loadProfileData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, currentUserId]);
+
+  useEffect(() => {
+    if (isMobile && selectedPost) {
+      setSelectedPost(null);
+    }
+  }, [isMobile, selectedPost]);
 
   const normalizePosts = (rows: any[] | null | undefined) => {
     if (!rows) return [];
@@ -372,6 +382,14 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
     loadProfileData();
   };
 
+  const handlePostClick = (post: AnyPost) => {
+    if (isMobile) {
+      router.push(`/listing/${post.id}`);
+      return;
+    }
+    setSelectedPost(post);
+  };
+
   const tabItems = useMemo(() => {
     const base: Array<{
       key: "posts" | "likes" | "saved";
@@ -583,7 +601,7 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
                     userId={currentUserId}
                     onLike={handleLike}
                     onSave={handleSave}
-                    onClick={() => setSelectedPost(post)}
+                    onClick={() => handlePostClick(post)}
                     style={{
                       animationDelay: `${index * 40}ms`,
                     }}
@@ -599,7 +617,7 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
 </div>
 
 
-      {selectedPost && (
+      {selectedPost && !isMobile && (
         <PostDetailModal
           post={selectedPost}
           userId={currentUserId}

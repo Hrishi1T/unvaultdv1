@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export type ListingFormData = {
+  garment_name: string;
   brand: string;
   garment_type: string;
   color: string;
@@ -26,6 +27,25 @@ export function ListingFormFields({
       <h2 className="text-base font-semibold text-zinc-900">Details</h2>
 
       <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="space-y-2">
+          <Label
+            htmlFor="garment_name"
+            className="text-xs font-medium text-zinc-700"
+          >
+            Garment Name <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="garment_name"
+            required
+            value={formData.garment_name}
+            onChange={(e) =>
+              setFormData({ ...formData, garment_name: e.target.value })
+            }
+            placeholder="e.g., Varsity Bomber, Classic Tee"
+            className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
+          />
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="brand" className="text-xs font-medium text-zinc-700">
             Brand <span className="text-red-500">*</span>

@@ -6,6 +6,7 @@ import { createClient } from "../../../supabase/client";
 import { PostCard } from "./post-card";
 import { PostDetailModal } from "./post-detail-modal";
 import { openSignInModal } from "@/lib/open-sign-in-modal";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Post {
   id: string;
@@ -43,6 +44,7 @@ interface PublicFeedGridProps {
 }
 
 export function PublicFeedGrid({ posts: initialPosts, userId }: PublicFeedGridProps) {
+  const isMobile = useIsMobile();
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
@@ -55,6 +57,12 @@ export function PublicFeedGrid({ posts: initialPosts, userId }: PublicFeedGridPr
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
+
+  useEffect(() => {
+    if (isMobile && selectedPost) {
+      setSelectedPost(null);
+    }
+  }, [isMobile, selectedPost]);
 
   const loadFollowing = async () => {
     if (!userId) return;
@@ -165,6 +173,14 @@ export function PublicFeedGrid({ posts: initialPosts, userId }: PublicFeedGridPr
     refreshPosts();
   };
 
+  const handlePostClick = (post: Post) => {
+    if (isMobile) {
+      router.push(`/listing/${post.id}`);
+      return;
+    }
+    setSelectedPost(post);
+  };
+
   if (posts.length === 0) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -185,14 +201,14 @@ export function PublicFeedGrid({ posts: initialPosts, userId }: PublicFeedGridPr
             userId={userId || ""}
             onLike={handleLike}
             onSave={handleSave}
-            onClick={() => setSelectedPost(post)}
+            onClick={() => handlePostClick(post)}
             followingIds={followingIds}
             onFollow={handleFollow}
           />
         ))}
       </div>
 
-      {selectedPost && (
+      {selectedPost && !isMobile && (
         <PostDetailModal
           post={selectedPost}
           userId={userId || ""}

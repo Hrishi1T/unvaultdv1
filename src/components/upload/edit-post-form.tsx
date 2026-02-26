@@ -20,6 +20,7 @@ export function EditPostForm({ post, userId }: EditPostFormProps) {
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState<ListingFormData>({
+    garment_name: post.garment_name || "",
     brand: post.brand || "",
     garment_type: post.garment_type || "",
     color: post.color || "",
@@ -37,6 +38,7 @@ export function EditPostForm({ post, userId }: EditPostFormProps) {
 
   const handleSubmit = async () => {
     if (
+      !formData.garment_name ||
       !formData.brand ||
       !formData.garment_type ||
       !formData.color ||
@@ -44,7 +46,7 @@ export function EditPostForm({ post, userId }: EditPostFormProps) {
       !formData.brand_website
     ) {
       alert(
-        "Please fill in all required fields (Brand, Garment Type, Color, Brand Social Link, Brand Website).",
+        "Please fill in all required fields (Garment Name, Brand, Garment Type, Color, Brand Social Link, Brand Website).",
       );
       return;
     }
@@ -55,6 +57,7 @@ export function EditPostForm({ post, userId }: EditPostFormProps) {
       const { error } = await supabase
         .from("posts")
         .update({
+          garment_name: formData.garment_name,
           brand: formData.brand,
           garment_type: formData.garment_type,
           color: formData.color,
@@ -85,6 +88,7 @@ export function EditPostForm({ post, userId }: EditPostFormProps) {
   };
 
   const canSave =
+    !!formData.garment_name &&
     !!formData.brand &&
     !!formData.garment_type &&
     !!formData.color &&
@@ -142,6 +146,9 @@ export function EditPostForm({ post, userId }: EditPostFormProps) {
           <div className="text-sm font-semibold text-zinc-900">Checklist</div>
 
           <ul className="mt-4 space-y-2 text-sm text-zinc-600">
+            <li className={formData.garment_name ? "text-zinc-900" : ""}>
+              {formData.garment_name ? "✓" : "•"} Garment name
+            </li>
             <li className={formData.brand ? "text-zinc-900" : ""}>
               {formData.brand ? "✓" : "•"} Brand
             </li>

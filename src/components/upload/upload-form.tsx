@@ -21,6 +21,7 @@ export function UploadForm({ userId }: UploadFormProps) {
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [formData, setFormData] = useState({
+    garment_name: "",
     brand: "",
     garment_type: "",
     color: "",
@@ -60,6 +61,7 @@ export function UploadForm({ userId }: UploadFormProps) {
     }
 
     if (
+      !formData.garment_name ||
       !formData.brand ||
       !formData.garment_type ||
       !formData.color ||
@@ -67,7 +69,7 @@ export function UploadForm({ userId }: UploadFormProps) {
       !formData.brand_website
     ) {
       alert(
-        "Please fill in all required fields (Brand, Garment Type, Color, Brand Social Link, Brand Website).",
+        "Please fill in all required fields (Name, Brand, Garment Type, Color, Brand Social Link, Brand Website).",
       );
       return;
     }
@@ -101,6 +103,7 @@ export function UploadForm({ userId }: UploadFormProps) {
         .from("posts")
         .insert({
           user_id: userId,
+          garment_name: formData.garment_name,
           brand: formData.brand,
           garment_type: formData.garment_type,
           color: formData.color,
@@ -143,6 +146,7 @@ export function UploadForm({ userId }: UploadFormProps) {
 
   const canPublish =
     images.length > 0 &&
+    !!formData.garment_name &&
     !!formData.brand &&
     !!formData.garment_type &&
     !!formData.color &&
@@ -244,6 +248,9 @@ export function UploadForm({ userId }: UploadFormProps) {
           <ul className="mt-4 space-y-2 text-sm text-zinc-600">
             <li className={images.length ? "text-zinc-900" : ""}>
               {images.length ? "✓" : "•"} Add at least 1 photo
+            </li>
+            <li className={formData.garment_name ? "text-zinc-900" : ""}>
+              {formData.garment_name ? "✓" : "•"} Name
             </li>
             <li className={formData.brand ? "text-zinc-900" : ""}>
               {formData.brand ? "✓" : "•"} Brand
