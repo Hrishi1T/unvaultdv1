@@ -79,7 +79,7 @@ export function EditPostForm({ post }: EditPostFormProps) {
         const { error } = await supabase
           .from("post_images")
           .delete()
-          .in("id", [...removedIds]);
+          .in("id", Array.from(removedIds));
         if (error) throw error;
       }
 
