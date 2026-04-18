@@ -1,16 +1,13 @@
-import { createClient } from "../../supabase/server";
 import Link from "next/link";
+import { createClient } from "../../supabase/server";
 import { FeedHeader } from "@/components/feed/feed-header";
-import { PublicFeedGrid } from "@/components/feed/public-feed-grid";
 
 export default async function Home() {
   const supabase = await createClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Fetch the logged-in user's profile row (for avatar_url, username, etc.)
   const { data: profile } = user
     ? await supabase
         .from("users")
@@ -19,35 +16,24 @@ export default async function Home() {
         .single()
     : { data: null };
 
-  // Fetch posts server-side with public access
-  const { data: postsData } = await supabase
-    .from("posts")
-    .select(`
-      *,
-      users!posts_user_id_fkey (id, email, name, username, avatar_url),
-      post_images (id, image_url, order_index),
-      likes (id, user_id),
-      saves (id, user_id)
-    `)
-    .order("created_at", { ascending: false });
-
-  const posts = (postsData || []).map((post: any) => ({
-    ...post,
-    post_images: post.post_images?.slice()?.sort(
-      (a: any, b: any) => a.order_index - b.order_index
-    ),
-    _count: {
-      likes: post.likes?.length || 0,
-      saves: post.saves?.length || 0,
-    },
-  }));
-
   return (
-    <div className="min-h-screen bg-white text-zinc-900">
+    <div className="min-h-screen bg-white text-zinc-900 flex flex-col">
       <FeedHeader user={user} profile={profile} />
-
-      <main className="mx-auto max-w-6xl px-4 py-4">
-        <PublicFeedGrid posts={posts} userId={user?.id || null} />
+      <main className="flex-1 flex flex-col items-center justify-center gap-8 px-4">
+        <nav className="flex flex-col items-center gap-6">
+          <Link
+            href="/upcoming"
+            className="text-5xl sm:text-7xl font-semibold tracking-tight text-zinc-900 hover:text-zinc-400 transition-colors leading-none"
+          >
+            Upcoming
+          </Link>
+          <Link
+            href="/live"
+            className="text-5xl sm:text-7xl font-semibold tracking-tight text-zinc-900 hover:text-zinc-400 transition-colors leading-none"
+          >
+            Live
+          </Link>
+        </nav>
       </main>
     </div>
   );

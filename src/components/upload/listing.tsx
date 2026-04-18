@@ -5,14 +5,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export type ListingFormData = {
-  garment_name: string;
   brand: string;
-  garment_type: string;
-  color: string;
-  size_fit: string;
-  brand_social_link: string;
   brand_website: string;
   description: string;
+  post_type: "live" | "upcoming";
+  event_date: string;
 };
 
 export function ListingFormFields({
@@ -27,28 +24,9 @@ export function ListingFormFields({
       <h2 className="text-base font-semibold text-zinc-900">Details</h2>
 
       <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div className="space-y-2">
-          <Label
-            htmlFor="garment_name"
-            className="text-xs font-medium text-zinc-700"
-          >
-            Garment Name <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="garment_name"
-            required
-            value={formData.garment_name}
-            onChange={(e) =>
-              setFormData({ ...formData, garment_name: e.target.value })
-            }
-            placeholder="e.g., Varsity Bomber, Classic Tee"
-            className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
-          />
-        </div>
-
-        <div className="space-y-2">
+        <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="brand" className="text-xs font-medium text-zinc-700">
-            Brand <span className="text-red-500">*</span>
+            Brand Name <span className="text-red-500">*</span>
           </Label>
           <Input
             id="brand"
@@ -56,74 +34,6 @@ export function ListingFormFields({
             value={formData.brand}
             onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
             placeholder="e.g., Nike, Vintage, Custom"
-            className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label
-            htmlFor="garment_type"
-            className="text-xs font-medium text-zinc-700"
-          >
-            Garment Type <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="garment_type"
-            required
-            value={formData.garment_type}
-            onChange={(e) =>
-              setFormData({ ...formData, garment_type: e.target.value })
-            }
-            placeholder="e.g., Jacket, T-Shirt, Pants"
-            className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="color" className="text-xs font-medium text-zinc-700">
-            Color <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="color"
-            required
-            value={formData.color}
-            onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-            placeholder="e.g., Black, Vintage Blue, Multi"
-            className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="size_fit" className="text-xs font-medium text-zinc-700">
-            Size / Fit
-          </Label>
-          <Input
-            id="size_fit"
-            value={formData.size_fit}
-            onChange={(e) =>
-              setFormData({ ...formData, size_fit: e.target.value })
-            }
-            placeholder="e.g., Large, Oversized, Slim fit"
-            className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
-          />
-        </div>
-
-        <div className="space-y-2 sm:col-span-2">
-          <Label
-            htmlFor="brand_social"
-            className="text-xs font-medium text-zinc-700"
-          >
-            Brand Social Link <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="brand_social"
-            type="url"
-            required
-            value={formData.brand_social_link}
-            onChange={(e) =>
-              setFormData({ ...formData, brand_social_link: e.target.value })
-            }
-            placeholder="https://instagram.com/brand"
             className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
           />
         </div>
@@ -153,7 +63,7 @@ export function ListingFormFields({
             htmlFor="description"
             className="text-xs font-medium text-zinc-700"
           >
-            Description
+            Description <span className="text-zinc-400">(optional)</span>
           </Label>
           <Textarea
             id="description"
@@ -165,6 +75,49 @@ export function ListingFormFields({
             className="bg-white text-black placeholder:text-zinc-500 border border-zinc-300 focus:ring-2 focus:ring-black"
           />
         </div>
+
+        <div className="space-y-2 sm:col-span-2">
+          <Label className="text-xs font-medium text-zinc-700">
+            Type <span className="text-red-500">*</span>
+          </Label>
+          <div className="flex gap-4">
+            {(["live", "upcoming"] as const).map((type) => (
+              <label
+                key={type}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border cursor-pointer text-sm font-medium transition-colors ${
+                  formData.post_type === type
+                    ? "border-zinc-900 bg-zinc-900 text-white"
+                    : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="post_type"
+                  value={type}
+                  checked={formData.post_type === type}
+                  onChange={() => setFormData({ ...formData, post_type: type })}
+                  className="hidden"
+                />
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {formData.post_type === "upcoming" && (
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="event_date" className="text-xs font-medium text-zinc-700">
+              Date <span className="text-zinc-400">(optional)</span>
+            </Label>
+            <Input
+              id="event_date"
+              type="date"
+              value={formData.event_date}
+              onChange={(e) => setFormData({ ...formData, event_date: e.target.value })}
+              className="bg-white text-black border border-zinc-300 focus:ring-2 focus:ring-black"
+            />
+          </div>
+        )}
       </div>
     </section>
   );

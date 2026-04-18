@@ -26,5 +26,5 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
     redirect("/");
   }
 
-  return <EditPostForm post={post} userId={user.id} />;
+  return <EditPostForm post={post} />;
 }

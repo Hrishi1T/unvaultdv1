@@ -5,10 +5,19 @@ import { ListingDetailPageView } from "@/components/feed/listing-detail-page-vie
 
 interface ListingPageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ from?: string }>;
 }
 
-export default async function ListingPage({ params }: ListingPageProps) {
+function getSafeReturnTo(candidate?: string) {
+  if (!candidate) return null;
+  if (!candidate.startsWith("/")) return null;
+  if (candidate.startsWith("//")) return null;
+  return candidate;
+}
+
+export default async function ListingPage({ params, searchParams }: ListingPageProps) {
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const supabase = await createClient();
 
   const {
@@ -50,6 +59,10 @@ export default async function ListingPage({ params }: ListingPageProps) {
     },
   };
 
+  const returnTo =
+    getSafeReturnTo(resolvedSearchParams?.from) ||
+    (post.post_type === "live" ? "/live" : post.post_type === "upcoming" ? "/upcoming" : null);
+
   return (
     <div className="min-h-screen bg-white text-zinc-900">
       <FeedHeader user={user} profile={profile} />
@@ -58,6 +71,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
           postId={id}
           currentUserId={user?.id || ""}
           initialPost={initialPost}
+          returnTo={returnTo}
         />
       </main>
     </div>

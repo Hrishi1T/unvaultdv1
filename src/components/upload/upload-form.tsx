@@ -21,25 +21,19 @@ export function UploadForm({ userId }: UploadFormProps) {
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [formData, setFormData] = useState({
-    garment_name: "",
     brand: "",
-    garment_type: "",
-    color: "",
-    size_fit: "",
-    brand_social_link: "",
     brand_website: "",
     description: "",
+    post_type: "live" as "live" | "upcoming",
+    event_date: "",
   });
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length + images.length > 5) {
-      alert("Maximum 5 images allowed");
-      return;
-    }
     setImages((prev) => [...prev, ...files]);
     const urls = files.map((file) => URL.createObjectURL(file));
     setPreviewUrls((prev) => [...prev, ...urls]);
+    e.target.value = "";
   };
 
   const normalizeUrl = (url: string) => {
@@ -47,6 +41,8 @@ export function UploadForm({ userId }: UploadFormProps) {
     if (!trimmed) return "";
     return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
   };
+
+  const isFilled = (value: string) => value.trim().length > 0;
 
   const removeImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
@@ -60,17 +56,8 @@ export function UploadForm({ userId }: UploadFormProps) {
       return;
     }
 
-    if (
-      !formData.garment_name ||
-      !formData.brand ||
-      !formData.garment_type ||
-      !formData.color ||
-      !formData.brand_social_link ||
-      !formData.brand_website
-    ) {
-      alert(
-        "Please fill in all required fields (Name, Brand, Garment Type, Color, Brand Social Link, Brand Website).",
-      );
+    if (!isFilled(formData.brand) || !isFilled(formData.brand_website)) {
+      alert("Please fill in all required fields (Brand Name, Brand Website).");
       return;
     }
 
@@ -103,21 +90,14 @@ export function UploadForm({ userId }: UploadFormProps) {
         .from("posts")
         .insert({
           user_id: userId,
-          garment_name: formData.garment_name,
-          brand: formData.brand,
-          garment_type: formData.garment_type,
-          color: formData.color,
-          size_fit: formData.size_fit || null,
-
-          brand_social_link: formData.brand_social_link
-            ? normalizeUrl(formData.brand_social_link)
-            : null,
-
-          brand_website: formData.brand_website
-            ? normalizeUrl(formData.brand_website)
-            : null,
-
-          description: formData.description || null,
+          brand: formData.brand.trim(),
+          brand_website: normalizeUrl(formData.brand_website),
+          description: formData.description,
+          post_type: formData.post_type,
+          event_date:
+            formData.post_type === "upcoming" && formData.event_date
+              ? formData.event_date
+              : null,
         })
         .select()
         .single();
@@ -135,7 +115,7 @@ export function UploadForm({ userId }: UploadFormProps) {
 
       if (imagesError) throw imagesError;
 
-      router.push("/");
+      router.push(formData.post_type === "upcoming" ? "/upcoming" : "/live");
     } catch (error: any) {
       console.error("Upload error:", error);
       alert("Failed to publish. Please try again.");
@@ -146,12 +126,8 @@ export function UploadForm({ userId }: UploadFormProps) {
 
   const canPublish =
     images.length > 0 &&
-    !!formData.garment_name &&
-    !!formData.brand &&
-    !!formData.garment_type &&
-    !!formData.color &&
-    !!formData.brand_social_link &&
-    !!formData.brand_website;
+    isFilled(formData.brand) &&
+    isFilled(formData.brand_website);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
@@ -175,7 +151,7 @@ export function UploadForm({ userId }: UploadFormProps) {
           <section className="rounded-2xl border border-zinc-200 bg-white p-6">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-semibold text-zinc-900">Photos</h2>
-              <p className="text-xs text-zinc-500">1–5 images</p>
+              <p className="text-xs text-zinc-500">1+ images</p>
             </div>
 
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -201,19 +177,17 @@ export function UploadForm({ userId }: UploadFormProps) {
                 </div>
               ))}
 
-              {images.length < 5 && (
-                <label className="aspect-square rounded-xl border border-dashed border-zinc-300 bg-white flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-50 transition-colors">
-                  <Upload className="w-6 h-6 text-zinc-500" />
-                  <span className="mt-2 text-sm text-zinc-600">Upload</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageSelect}
-                    className="hidden"
-                  />
-                </label>
-              )}
+              <label className="aspect-square rounded-xl border border-dashed border-zinc-300 bg-white flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-50 transition-colors">
+                <Upload className="w-6 h-6 text-zinc-500" />
+                <span className="mt-2 text-sm text-zinc-600">Upload</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+              </label>
             </div>
           </section>
 
@@ -249,22 +223,17 @@ export function UploadForm({ userId }: UploadFormProps) {
             <li className={images.length ? "text-zinc-900" : ""}>
               {images.length ? "✓" : "•"} Add at least 1 photo
             </li>
-            <li className={formData.garment_name ? "text-zinc-900" : ""}>
-              {formData.garment_name ? "✓" : "•"} Name
-            </li>
             <li className={formData.brand ? "text-zinc-900" : ""}>
-              {formData.brand ? "✓" : "•"} Brand
+              {formData.brand ? "✓" : "•"} Brand name
             </li>
-            <li className={formData.garment_type ? "text-zinc-900" : ""}>
-              {formData.garment_type ? "✓" : "•"} Garment type
+            <li className={formData.brand_website ? "text-zinc-900" : ""}>
+              {formData.brand_website ? "✓" : "•"} Brand website
             </li>
-            <li className={formData.color ? "text-zinc-900" : ""}>
-              {formData.color ? "✓" : "•"} Color
-            </li>
+            <li className="text-zinc-900">✓ Type ({formData.post_type})</li>
           </ul>
 
           <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-600">
-            Tip: Use 3–5 photos with good lighting. First image becomes the
+            Tip: Use multiple photos with good lighting. First image becomes the
             cover.
           </div>
         </aside>

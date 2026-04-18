@@ -1,0 +1,2 @@
+ALTER TABLE public.posts ALTER COLUMN garment_type DROP NOT NULL;
+ALTER TABLE public.posts ALTER COLUMN color DROP NOT NULL;

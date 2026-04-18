@@ -216,11 +216,14 @@ export type Database = {
           brand: string
           brand_social_link: string | null
           brand_website: string | null
-          color: string
+          color: string | null
           created_at: string | null
           description: string | null
-          garment_type: string
+          event_date: string | null
+          garment_name: string | null
+          garment_type: string | null
           id: string
+          post_type: string
           size_fit: string | null
           updated_at: string | null
           user_id: string
@@ -229,11 +232,14 @@ export type Database = {
           brand: string
           brand_social_link?: string | null
           brand_website?: string | null
-          color: string
+          color?: string | null
           created_at?: string | null
           description?: string | null
-          garment_type: string
+          event_date?: string | null
+          garment_name?: string | null
+          garment_type?: string | null
           id?: string
+          post_type?: string
           size_fit?: string | null
           updated_at?: string | null
           user_id: string
@@ -242,11 +248,14 @@ export type Database = {
           brand?: string
           brand_social_link?: string | null
           brand_website?: string | null
-          color?: string
+          color?: string | null
           created_at?: string | null
           description?: string | null
-          garment_type?: string
+          event_date?: string | null
+          garment_name?: string | null
+          garment_type?: string | null
           id?: string
+          post_type?: string
           size_fit?: string | null
           updated_at?: string | null
           user_id?: string
